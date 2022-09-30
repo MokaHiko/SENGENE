@@ -1,0 +1,3 @@
+[submodule "SGE/vendor/imgui/imgui"]
+	path = SGE/vendor/imgui/imgui
+	url = https://github.com/ocornut/imgui.git

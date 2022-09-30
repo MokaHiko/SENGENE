@@ -4,9 +4,11 @@
 #include <cassert>
 
 #include "Renderer/Renderer.h"
+#include "ImGui/ImGuiLayer.h"
 
 #include "Core/TimeStep.h"
 #include "Core/Input.h"
+
 namespace SGE{
 	Application* Application::s_Instance = nullptr;
 
@@ -20,6 +22,9 @@ namespace SGE{
 
 		Renderer::Init();
 		m_LastFrameTime = (float)glfwGetTime();
+
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -31,8 +36,10 @@ namespace SGE{
 		for(Layer* layer : m_LayerStack)
 			layer->OnUpdate(timestep);
 
-		for(Layer* layer : m_LayerStack)
+		m_ImGuiLayer->Begin();
+		for(Layer* layer : m_LayerStack) // TODO: Only Update ImGuiLayers in Debug
 			layer->OnImGuiRender();
+		m_ImGuiLayer->End();
 	}
 	
 	void Application::PushLayer(Layer* layer)

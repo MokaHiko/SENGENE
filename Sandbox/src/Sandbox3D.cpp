@@ -6,6 +6,8 @@
 #include "Scripts/CameraController.h"
 #include "Scripts/Unit.h"
 
+#include <imgui/imgui.h>
+
 Sandbox3D::~Sandbox3D()
 {
 }
@@ -150,6 +152,8 @@ void Sandbox3D::OnUpdate(SGE::TimeStep ts)
 	SGE::Renderer::End();
 }
 
+bool show = true;
 void Sandbox3D::OnImGuiRender()
 {
+	ImGui::ShowDemoWindow(&show);
 }

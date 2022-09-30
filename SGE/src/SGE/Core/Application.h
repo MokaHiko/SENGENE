@@ -7,6 +7,7 @@
 
 #include "Core/Layer.h"
 #include "Events/ApplicationEvent.h"
+#include "ImGui/ImGuiLayer.h"
 
 const uint32_t WIDTH = 1280;
 const uint32_t HEIGHT = 720;
@@ -38,6 +39,8 @@ namespace SGE{
 
         float m_LastFrameTime = 0.0f;
         bool m_Running = true;
+
+        ImGuiLayer* m_ImGuiLayer;
     };
 
     SGE::Application* CreateApplication();
