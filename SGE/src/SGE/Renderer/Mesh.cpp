@@ -92,7 +92,7 @@ namespace SGE {
 		m_InstanceCount++;
 	}
 	
-	void Mesh::Draw()
+	void Mesh::DrawInstanced()
 	{
 		glBindVertexArray(m_VAO);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, m_VertexCount, m_InstanceCount);

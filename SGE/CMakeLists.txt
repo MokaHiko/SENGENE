@@ -6,9 +6,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 project(SENGINE VERSION 0.1.0)
 
-include(CTest)
-enable_testing()
-
 #Windows Sources
 file(GLOB HEADERS "src/SGE/*.h"   "src/SGE/Core/*.h"   "src/SGE/Platform/Windows/*.h"    "src/SGE/Core/*.h"        "src/SGE/Events/*.h"    "src/SGE/Scene/*.h" "src/SGE/ImGui/*.h")
 file(GLOB SOURCES "src/SGE/*.cpp" "src/SGE/Core/*.cpp" "src/SGE/Platform/Windows/*.cpp"  "src/SGE/Renderer/*.cpp"  "src/SGE/Events/*.cpp"  "src/SGE/Scene/*.cpp" "src/SGE/ImGui/*.cpp")
@@ -22,6 +19,7 @@ add_subdirectory(vendor/glm)
 add_subdirectory(vendor/entt)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
+add_subdirectory(vendor/Assimp)
 
 target_include_directories(${PROJECT_NAME} 
 	PUBLIC src
@@ -32,15 +30,18 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC vendor/glm
 	PUBLIC vendor/stb_image
 	PUBLIC vendor/imgui
+	PUBLIC vendor/Assimp/include
 	)
+
+# target_link_directories(${PROJECT_NAME} PUBLIC
+# 	SGE/vendor/Assimp/lib/${CMAKE_BUILD_TYPE}
+# )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
 	glfw
 	glad
 	glm
 	imgui
+	assimp
 	)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)

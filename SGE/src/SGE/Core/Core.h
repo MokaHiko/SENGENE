@@ -10,7 +10,7 @@ namespace SGE  {
 	template<typename T, typename ... Args>
 	constexpr Scope<T> CreateScope(Args&& ...)
 	{
-		std::unique_ptr<T>(std::forward<Args>(args)...);
+		return std::unique_ptr<T>(std::forward<Args>(args)...);
 	}
 
 
@@ -19,7 +19,7 @@ namespace SGE  {
 	template<typename T, typename ...Args>
 	constexpr Ref<T> CreateRef(Args&& ...args)
 	{
-		return std::make_unique<T>(std::forward<Args>(args)...);
+		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 }
 #endif

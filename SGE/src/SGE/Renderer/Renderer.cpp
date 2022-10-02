@@ -82,18 +82,17 @@ namespace SGE{
 
 			// draw mesh instances
 			for(Ref<Mesh> mesh : it.second.m_Meshes)
-				mesh->Draw();
+				mesh->DrawInstanced();
 			// TODO:: HANDLE MESH WITH DIFFERENT MATERIALS
 		}
 	}
 	
 	void Renderer::Draw(Ref<Mesh> mesh, Ref<Material> material, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
-		// create material group if renderer has yet to see it
 		if(m_MaterialGroups.find(material) == m_MaterialGroups.end())
 			m_MaterialGroups[material] = MaterialGroup(mesh);
 		else
-			m_MaterialGroups[material].m_Meshes.insert(mesh);
+			m_MaterialGroups[material].m_Meshes.insert(mesh); 
 
 		mesh->AddInstance(position, rotation, scale); 
 	}

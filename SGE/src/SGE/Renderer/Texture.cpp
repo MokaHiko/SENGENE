@@ -8,7 +8,7 @@
 
 namespace SGE {
 	Texture2D::Texture2D(const char* path, TextureType type)
-		:m_Type(type)
+		:m_RendererID(0), m_Type(type)
 	{
 		int width, height, nChannels;
 		unsigned char* data = stbi_load(path, &width, &height, &nChannels, 0);

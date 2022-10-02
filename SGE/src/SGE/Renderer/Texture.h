@@ -23,8 +23,8 @@ namespace SGE {
         static Ref<Texture2D> CreateTexture2D(const std::string& path);
         uint32_t GetID() const {return m_RendererID;}
     private:
-        uint32_t m_RendererID = 0;
-        TextureType m_Type = TextureType::None;
+        uint32_t m_RendererID;
+        TextureType m_Type;
     };
 }
 #endif

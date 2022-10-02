@@ -10,6 +10,7 @@
 
 Sandbox3D::~Sandbox3D()
 {
+	
 }
 
 void Sandbox3D::OnAttach()
@@ -102,11 +103,9 @@ void Sandbox3D::OnAttach()
 	}
 
 	auto mesh = SGE::Mesh::CreateMesh(meshVertices);
-	auto dirtmesh = SGE::Mesh::CreateMesh(meshVertices);
-
 	{
 		SGE::Entity dirt = m_Scene->CreateEntity("dirt", {1.5f, 0, 1.5});
-		auto& meshComponent = dirt.AddComponent<SGE::MeshComponent>(dirtmesh, dirtMaterial);
+		auto& meshComponent = dirt.AddComponent<SGE::MeshComponent>(mesh, dirtMaterial);
 	}
 
 	int root = 10;
@@ -152,7 +151,7 @@ void Sandbox3D::OnUpdate(SGE::TimeStep ts)
 	SGE::Renderer::End();
 }
 
-bool show = true;
+static bool show = true;
 void Sandbox3D::OnImGuiRender()
 {
 	ImGui::ShowDemoWindow(&show);
