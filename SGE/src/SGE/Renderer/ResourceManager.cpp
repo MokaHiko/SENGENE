@@ -3,7 +3,7 @@
 namespace SGE {
 	std::unordered_map<std::string, Ref<Shader>> ResourceManager::m_Shaders{};
 	std::unordered_map<std::string, Ref<Texture2D>> ResourceManager::m_Textures{};
-	std::unordered_map<std::string, Ref<Mesh>> ResourceManager::m_Meshes{};
+    std::unordered_map<std::string, Ref<Material>> ResourceManager::m_Materials{};
 
 	Ref<Shader> ResourceManager::CreateShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
@@ -39,6 +39,31 @@ namespace SGE {
 			return m_Textures[textureName];
 		
 		std::cout << "ERROR::RESOURCE: Texture \"" <<  textureName << "\" does not exist! \n";
+		return nullptr;
+	}
+	
+	Ref<Material> ResourceManager::CreateMaterial(const std::string& name, const glm::vec3& ambientColor, const glm::vec3 diffuseColor, 
+												const Ref<Texture2D>& diffuseTexture, const Ref<Texture2D>& specularTexture)
+	{
+		if(m_Materials.find(name) == m_Materials.end())
+		{
+			m_Materials[name] = CreateRef<Material>();
+			m_Materials[name]->Name = name;
+			m_Materials[name]->AmbientColor = ambientColor;
+			m_Materials[name]->DiffuseColor = diffuseColor;
+			m_Materials[name]->DiffuseTexture = diffuseTexture;
+			m_Materials[name]->SpecularTexture = specularTexture;
+		}
+
+		return m_Materials[name];
+	}
+	
+	Ref<Material> ResourceManager::GetMaterial(const std::string& name)
+	{
+		if(m_Materials.find(name) != m_Materials.end())
+			return m_Materials[name];
+
+		std::cout << "ERROR::RESOURCE: Material \"" << name << "\" does not exist! \n";
 		return nullptr;
 	}
 }

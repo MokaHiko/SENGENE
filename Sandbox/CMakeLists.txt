@@ -4,7 +4,7 @@ project(Sandbox VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-file(GLOB SOURCES "src/*.cpp" "src/Scripts/*.cpp" "src/Scripts/*.h")
+file(GLOB SOURCES "src/*.cpp" "src/Scripts/*.cpp" "src/Scripts/*.h" "src/Panels/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} SENGINE)

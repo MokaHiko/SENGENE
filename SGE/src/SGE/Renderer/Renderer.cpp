@@ -3,15 +3,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace SGE{
-    std::unordered_map<Ref<Material>, Renderer::MaterialGroup> Renderer::m_MaterialGroups; // TODO: change to a type of weak ptr  
+    std::unordered_set <Ref<Model>> Renderer::m_Models;
 	SceneData Renderer::m_SceneData{};
-    uint32_t Renderer::m_MeshCount = 0;
 
 	Renderer::Renderer(){}
 	void Renderer::Init()
 	{
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
 	}
 	
     void Renderer::Configure(SceneData& sceneData)
@@ -24,10 +27,12 @@ namespace SGE{
 		m_SceneData.SceneShader->SetInt("u_Material.texture_specular1", 1);
 
 		// directional lights
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Ambient", glm::vec3(0.05f));
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Diffuse", glm::vec3(0.4f));
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Specular", glm::vec3(0.5f));
+		auto& dirLight = sceneData.DirectionalLight.GetComponent<DirectionalLightComponent>();
+		auto& dirLightTransform = sceneData.DirectionalLight.GetComponent<TransformComponent>();
+		m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", -dirLightTransform.Position);
+		m_SceneData.SceneShader->SetVec3("u_DirLight.Ambient", dirLight.Ambient);
+		m_SceneData.SceneShader->SetVec3("u_DirLight.Diffuse", dirLight.Diffuse);
+		m_SceneData.SceneShader->SetVec3("u_DirLight.Specular", dirLight.Specular);
 	}
 
 	void Renderer::Begin()
@@ -45,6 +50,9 @@ namespace SGE{
 		m_SceneData.SceneShader->SetMat4("view", camera.camera.GetViewMatrix());
 
 		m_SceneData.SceneShader->SetVec3("u_MainCameraPos", cameraPosition.Position);
+
+		// Directional Light
+		m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", -m_SceneData.DirectionalLight.GetComponent<TransformComponent>().Position);
 		
 		// Point Lights
 		int ctr = 0;
@@ -70,36 +78,21 @@ namespace SGE{
 
 	void Renderer::End()
 	{
-		for (auto& it : m_MaterialGroups)
-		{
-			// bind material values and textures
-			glActiveTexture(GL_TEXTURE0); 
-			glBindTexture(GL_TEXTURE_2D, it.first->DiffuseTextureID);
-			glActiveTexture(GL_TEXTURE1); 
-			glBindTexture(GL_TEXTURE_2D, it.first->SpecularTextureID);
+		for (auto& model : m_Models)
+			model->Render(m_SceneData.SceneShader);
 
-			m_SceneData.SceneShader->SetFloat("u_Material.shininess", it.first->Shininess);
-
-			// draw mesh instances
-			for(Ref<Mesh> mesh : it.second.m_Meshes)
-				mesh->DrawInstanced();
-			// TODO:: HANDLE MESH WITH DIFFERENT MATERIALS
-		}
+		m_Models.clear();
 	}
 	
-	void Renderer::Draw(Ref<Mesh> mesh, Ref<Material> material, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
-	{
-		if(m_MaterialGroups.find(material) == m_MaterialGroups.end())
-			m_MaterialGroups[material] = MaterialGroup(mesh);
-		else
-			m_MaterialGroups[material].m_Meshes.insert(mesh); 
-
-		mesh->AddInstance(position, rotation, scale); 
-	}
-
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
 		glViewport(0, 0, width, height);
+	}
+	
+	void Renderer::Draw(Ref<Model> model, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+	{
+		m_Models.insert(model);
+		model->AddInstance(position, rotation, scale);
 	}
 
 	Renderer::~Renderer(){}

@@ -1,6 +1,5 @@
 #include "SGE/SGE.h"
 
-#include "Sandbox3D.h"
 #include "FeatureTest3D.h"
 #include "SGE/Core/EntryPoint.h"
 

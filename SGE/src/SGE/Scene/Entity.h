@@ -32,6 +32,16 @@ namespace SGE {
             return m_Scene->Registry().any_of<T>(m_EntityHandle);
         }
 
+        bool operator==(const Entity& other) const
+        {
+            return other.m_EntityHandle == m_EntityHandle;
+        }
+
+        operator bool() const
+        {
+            return m_EntityHandle != entt::null;
+        }
+
     private:
         entt::entity m_EntityHandle = entt::null;
         Scene* m_Scene = nullptr; // TODO: some sort of weak ptr

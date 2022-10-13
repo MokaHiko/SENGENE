@@ -21,10 +21,22 @@ namespace SGE {
 
 		int format = GL_RGB;
 		int internalFormat = GL_RGB8;
-		if(nChannels > 3)
+		switch(nChannels)
 		{
+		case 1:
+			format = GL_RED;
+			internalFormat = GL_RED;
+			break;
+		case 3:
+			format = GL_RGB;
+			internalFormat = GL_RGB8;
+			break;
+		case 4:
 			format = GL_RGBA;
 			internalFormat = GL_RGBA8;
+			break;
+		default:
+			break;
 		}
 
 		glGenTextures(1, &m_RendererID);
@@ -49,13 +61,15 @@ namespace SGE {
 		glDeleteTextures(1, &m_RendererID);
 	}
 	
-	void Texture2D::Bind() const
+	void Texture2D::Bind(uint32_t textureUnit) const
 	{
+		glActiveTexture(GL_TEXTURE0 + m_TextureUnit);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	}
 	
-	void Texture2D::Unbind() const
+	void Texture2D::Unbind(uint32_t textureUnit) const
 	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	}
 	

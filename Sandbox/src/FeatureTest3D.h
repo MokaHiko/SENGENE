@@ -6,6 +6,8 @@
 #include "SGE/SGE.h"
 
 #include "Renderer/Model.h"
+#include "Panels/SceneHierarchyPanel.h"
+#include "Renderer/Framebuffer.h"
 
 class FeatureTest3D: public SGE::Layer
 {
@@ -19,11 +21,20 @@ public:
 
     virtual void OnUpdate(SGE::TimeStep ts) override;
     virtual void OnImGuiRender() override;
-private:
-    SGE::Ref<SGE::Shader> m_SampleShader;
-    SGE::Ref<SGE::Scene> m_Scene;
 
+    glm::vec2 m_ViewPortSize = { 0.0f, 0.0f };
+private:
+    bool OnWindowResize(SGE::WindowResizeEvent& event);
+private:
+    SGE::SceneHierarchyPanel m_SceneHierarchyPanel;
+    
+    void ShowFileMenuHierarchy();
+private:
+    SGE::Ref<SGE::Framebuffer> m_Framebuffer;
+    SGE::Ref<SGE::Scene> m_Scene;
     SGE::SceneData m_SceneData{};
+
+    SGE::Ref<SGE::Texture2D> m_SampleTexture;
 
     SGE::Ref<SGE::Model> m_Model;
 };

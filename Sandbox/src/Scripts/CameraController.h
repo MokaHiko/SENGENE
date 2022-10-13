@@ -11,6 +11,7 @@ class CameraController : public SGE::ScriptableEntity
 public:
     float MouseSensitivity = 0.1f;
     bool ConstrainPitch = true;
+    float MovementSpeed = 10.0f;
 
     SGE::Ref<SGE::Camera3D> m_Camera; // TODO:: Should be a weak ptr or something
 
@@ -34,23 +35,26 @@ public:
         // Handle KeyBoard Input
         glm::vec3& cameraPosition = GetComponent<SGE::TransformComponent>().Position;
         if(SGE::Input::IsKeyPressed(GLFW_KEY_W))
-                cameraPosition += m_Camera->GetFront() * timestep.GetSeconds();
+                cameraPosition += m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
         if(SGE::Input::IsKeyPressed(GLFW_KEY_S))
-                cameraPosition -= m_Camera->GetFront() * timestep.GetSeconds();
+                cameraPosition -= m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
         if(SGE::Input::IsKeyPressed(GLFW_KEY_D))
-                cameraPosition += m_Camera->GetRight() * timestep.GetSeconds();
+                cameraPosition += m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
         if(SGE::Input::IsKeyPressed(GLFW_KEY_A))
-                cameraPosition -= m_Camera->GetRight() * timestep.GetSeconds();
+                cameraPosition -= m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
         if(SGE::Input::IsKeyPressed(GLFW_KEY_SPACE))
-                cameraPosition += m_Camera->GetUp() * timestep.GetSeconds();
+                cameraPosition += m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
         if(SGE::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
-                cameraPosition -= m_Camera->GetUp() * timestep.GetSeconds();
+                cameraPosition -= m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
     }
 
     void MouseMoveEventCallBack(SGE::MouseMoveEvent& event)
     {
         if (!SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
+        {
+            m_FirstMove = true;
             return;
+        }
 
         auto [x,y] = event.GetMouseCoordinates();
         if(m_FirstMove)

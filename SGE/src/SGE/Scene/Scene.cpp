@@ -37,13 +37,13 @@ namespace SGE {
 			}
 		}
 		{
-			auto group = m_Registry.group<MeshComponent, TransformComponent>();
+			auto group = m_Registry.group<MeshRendererComponent, TransformComponent>();
 
 			for(auto entity : group)
 			{
-				auto& mesh = group.get<MeshComponent>(entity);
+				auto& model = group.get<MeshRendererComponent>(entity);
 				auto& transform = group.get<TransformComponent>(entity);
-				Renderer::Draw(mesh.Mesh, mesh.MeshMaterial, transform.Position, transform.Rotation, transform.Scale);
+				Renderer::Draw(model.Model, transform.Position, transform.Rotation, transform.Scale);
 			}
 		}
 		{

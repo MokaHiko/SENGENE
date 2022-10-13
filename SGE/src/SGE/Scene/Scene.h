@@ -19,6 +19,7 @@ namespace SGE {
         
         // Create Sort of Weak Ptr to replace raw *
         Entity MainCamera; 
+        Entity DirectionalLight;
         std::vector<Entity> PointLights;
 
         uint32_t SceneWidth;

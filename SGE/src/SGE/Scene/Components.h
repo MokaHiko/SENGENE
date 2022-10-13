@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "Core/Core.h"
-#include "Renderer/Mesh.h"
+#include "Renderer/Model.h"
 #include "Renderer/Camera.h"
 #include "Scene/ScriptableEntity.h"
 #include "Events/Event.h"
@@ -18,12 +18,11 @@ namespace SGE {
         glm::vec3 Scale    = {1.0f, 1.0f, 1.0f};
    };
 
-   struct MeshComponent
+   struct MeshRendererComponent
    {
-      Ref<Mesh> Mesh;
-      Ref<Material> MeshMaterial;
-      MeshComponent(Ref<SGE::Mesh> mesh, Ref<Material> material = nullptr)
-      :Mesh(mesh), MeshMaterial(material) {}
+      Ref<Model> Model;
+      MeshRendererComponent(Ref<SGE::Model> model)
+      :Model(model){}
    };
 
    struct PointLightComponent
@@ -33,6 +32,13 @@ namespace SGE {
       float Quadratic = 0.032f;
 
       glm::vec3 Ambient{0.05f};
+      glm::vec3 Diffuse{0.8f};
+      glm::vec3 Specular{1.0f};
+   };
+
+   struct DirectionalLightComponent
+   {
+      glm::vec3 Ambient{0.8f};
       glm::vec3 Diffuse{0.8f};
       glm::vec3 Specular{1.0f};
    };

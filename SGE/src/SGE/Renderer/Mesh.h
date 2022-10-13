@@ -3,75 +3,45 @@
 
 #pragma once
 #include "Core/Core.h"
-#include "Renderer/Texture.h"
+
 #include <glm/glm.hpp>
+#include "Renderer/Texture.h"
 
 namespace SGE {
-    struct Vertex 
+    struct Mesh
     {
-        glm::vec3 Position;
-        glm::vec3 Normal;
-        glm::vec2 TexCoord;
+    public:
+        Mesh() : m_NumIndices(0), m_BaseVertex(0), m_BaseIndex(0), m_MaterialIndex(0) {}
+        ~Mesh(){}
+
+        uint32_t NumIndices() const {return m_NumIndices;}
+        uint32_t BaseVertex() const {return m_BaseVertex;}
+        uint32_t BaseIndex() const {return m_BaseIndex;}
+        uint32_t MaterialIndex() const {return m_MaterialIndex;}
+    private:
+        uint32_t m_NumIndices;
+        uint32_t m_BaseVertex;
+        uint32_t m_BaseIndex;
+        uint32_t m_MaterialIndex;
+
+        friend class Model;
     };
 
     struct Material
     {
-        Material() {}
-        Material(Ref<Texture2D> diffuseTexture, Ref<Texture2D> specularTexture)
-        {
-            if(diffuseTexture != nullptr)
-                DiffuseTextureID = diffuseTexture->GetID();
-            if(specularTexture != nullptr)
-                SpecularTextureID = specularTexture->GetID();
-        }
-        
-        void ChangeDiffuse(Ref<Texture2D> diffuseTexture)
-        {
-            DiffuseTextureID = diffuseTexture->GetID();
-        }
+        std::string Name;
 
-        void ChangeSpecular(Ref<Texture2D> specularTexture)
-        {
-            SpecularTextureID = specularTexture->GetID();
-        }
+        glm::vec3 AmbientColor;
+        glm::vec3 DiffuseColor;
+        glm::vec3 SpecularColor;
 
-        static Ref<Material> CreateMaterial(Ref<Texture2D> diffuseTexture = nullptr, Ref<Texture2D> specularTexture = nullptr)
-        {
-            return CreateRef<Material>(diffuseTexture, specularTexture);
-        }
+        Ref<Texture2D> DiffuseTexture;
+        Ref<Texture2D> SpecularTexture;
 
-        uint32_t DiffuseTextureID = 0;
-        uint32_t SpecularTextureID = 0;
+        static Ref<Material> CreateMaterial(const std::string& name, const glm::vec3& ambientColor = glm::vec3(0.0f), const glm::vec3 diffuseColor = glm::vec3(0.0f), 
+                                     const Ref<Texture2D>& diffuseTexture = nullptr, const Ref<Texture2D>& specularTexture = nullptr);
 
-        float Shininess = 32;
-    };
-
-    class Mesh
-    {
-    public:
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
-        ~Mesh();
-
-        static Ref<Mesh> CreateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = {});
-
-        uint32_t VertexCount() const{ return m_VertexCount; }
-        uint32_t m_VAO = 0, m_PositionBuffer = 0, m_TextureUnitBuffer = 0;
-
-        void ChangeMaterial(uint32_t diffuseIndex, uint32_t specularIndex);
-        void AddInstance(const glm::vec3& position = glm::vec3(1.0f), 
-                         const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f));
-        void DrawInstanced();
-
-        uint32_t GetID() {return m_VAO;}; // TODO: create mesh UUIDs
-    private:
-        void ProcessMesh();
-    private:
-        std::vector<uint32_t> m_Indices;
-
-        static const uint32_t MAX_INSTANCES = 100000;
-        uint32_t m_InstanceCount = 0;
-        uint32_t m_PositionBufferPointer = 0;
-        uint32_t m_VertexCount = 0;
+        Material() : AmbientColor(glm::vec3{0}), DiffuseColor(glm::vec3{0}), SpecularColor(0.0), DiffuseTexture(nullptr), SpecularTexture(nullptr), Name("Uknown Material") {}
     };
 }
 

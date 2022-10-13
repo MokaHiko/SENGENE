@@ -29,6 +29,7 @@ namespace SGE{
 
 	Application::~Application()
 	{
+		
 	}
 	
 	void Application::Update(TimeStep timestep)
@@ -71,7 +72,7 @@ namespace SGE{
 	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
 		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
-		return true;
+		return false;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& event)
