@@ -63,7 +63,7 @@ namespace SGE {
 
         std::vector<uint32_t> m_Buffers;
     private:
-        uint32_t m_MaxInstances = 1000;
+        uint32_t m_MaxInstances = 10000;
         uint32_t m_NumInstances = 0;
 
         // model buffers

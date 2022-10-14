@@ -62,7 +62,7 @@ void Sandbox2D::OnAttach()
 
 		dirLight.AddComponent<SGE::MeshRendererComponent>(cubeModel);
 
-		int root = 5;
+		int root = 35;
 		int spacing = 10;
 		std::string name = "";
 		int ctr = 0;
