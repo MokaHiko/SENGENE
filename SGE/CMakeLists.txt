@@ -20,6 +20,7 @@ add_subdirectory(vendor/entt)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/Assimp)
+add_subdirectory(vendor/box2D)
 
 target_include_directories(${PROJECT_NAME} 
 	PUBLIC src
@@ -31,11 +32,8 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC vendor/stb_image
 	PUBLIC vendor/imgui
 	PUBLIC vendor/Assimp/include
+	PUBLIC vendor/box2D/include
 	)
-
-# target_link_directories(${PROJECT_NAME} PUBLIC
-# 	SGE/vendor/Assimp/lib/${CMAKE_BUILD_TYPE}
-# )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
 	glfw
@@ -43,5 +41,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	glm
 	imgui
 	assimp
+	box2d
 	)
 

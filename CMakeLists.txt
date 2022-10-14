@@ -8,4 +8,4 @@ project(SENGINE2D)
 
 # Link To Hazel
 add_subdirectory(./SGE) 
-add_subdirectory(./Sandbox) 
+add_subdirectory(./Sandbox2D) 

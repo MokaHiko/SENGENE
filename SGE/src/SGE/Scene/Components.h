@@ -38,9 +38,9 @@ namespace SGE {
 
    struct DirectionalLightComponent
    {
-      glm::vec3 Ambient{0.8f};
+      glm::vec3 Ambient{0.3f};
       glm::vec3 Diffuse{0.8f};
-      glm::vec3 Specular{1.0f};
+      glm::vec3 Specular{0.2f};
    };
 
    struct TagComponent
@@ -87,6 +87,34 @@ namespace SGE {
           assert(isEvent);
           EntityCallBack = callback;
       }
+   };
+
+   struct RigidBody2DComponent
+   {
+       enum class BodyType {Static = 0, Dynamic, Kinematic};
+
+       BodyType Type = BodyType::Static;
+       void* RuntimeBody = nullptr;
+
+       RigidBody2DComponent() = default;
+       RigidBody2DComponent(const RigidBody2DComponent& other) = default;
+   };
+
+   struct BoxCollider2DComponent
+   {
+       glm::vec2 offset = { 0.0, 0.0 };
+       glm::vec2 scale = { 0.5, 0.5 };
+
+       void* RuntimeFixture = nullptr;
+
+       // TODO: Make Physics Material
+       float Density = 1.0f;
+       float Friction = 0.5f;
+       float Restitution = 0.5f;
+       float RestitutionThreshold = 0.5f;
+
+       BoxCollider2DComponent() = default;
+       BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
    };
 }
 

@@ -4,3 +4,6 @@
 [submodule "SGE/vendor/Assimp"]
 	path = SGE/vendor/Assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "SGE/vendor/box2d"]
+	path = SGE/vendor/box2d
+	url = https://github.com/erincatto/box2d.git

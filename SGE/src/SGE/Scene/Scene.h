@@ -8,6 +8,7 @@
 #include <entt/entt.hpp>
 #include "Renderer/Shader.h"
 
+class b2World;
 namespace SGE {
     struct SceneData
     {
@@ -28,6 +29,12 @@ namespace SGE {
         Ref<Shader> SceneShader = nullptr;
     };
 
+    enum class SCENE_STATE 
+    {
+        PAUSE,
+        PLAY,
+    };
+
     class Scene
     {
     public:
@@ -36,6 +43,9 @@ namespace SGE {
 
         void Update(TimeStep timestep);
 
+        void OnScenePlay();
+        void OnSceneStop();
+
         Entity CreateEntity(const std::string& name = "UNNAMED_ENTITY", const glm::vec3& position = glm::vec3(0.0f))
         {
             Entity entity = {m_Registry.create(), this};
@@ -43,11 +53,12 @@ namespace SGE {
             entity.AddComponent<TransformComponent>(position);
             return entity;
         }
-
         entt::registry& Registry() {return m_Registry;}
     private:
+        b2World* m_PhysicsWorld = nullptr;
+        SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;
+    private:
         friend class Entity;
-
         entt::registry m_Registry;
     };
 }

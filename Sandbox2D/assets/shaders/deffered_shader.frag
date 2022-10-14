@@ -65,6 +65,7 @@ void main()
 		
 	FragColor = vec4(result, 1.0f);
 }
+
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
 	vec3 lightDir = normalize(-light.Direction);

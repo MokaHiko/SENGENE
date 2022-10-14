@@ -1,6 +1,6 @@
 #include "SGE/SGE.h"
 
-#include "FeatureTest3D.h"
+#include "Sandbox2D.h"
 #include "SGE/Core/EntryPoint.h"
 
 class SelfishGene : public SGE::Application
@@ -8,7 +8,7 @@ class SelfishGene : public SGE::Application
 public:
 	SelfishGene()
 	{
-        PushLayer(new FeatureTest3D());
+        PushLayer(new Sandbox2D());
 	}
 
 	~SelfishGene() {}
