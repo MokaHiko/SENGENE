@@ -17,66 +17,56 @@ void Sandbox2D::OnAttach()
 {
 	static const float z = -30;
 
-	// Scene Configuration
+	// App/Settings Configuration
 	m_Scene = SGE::CreateRef<SGE::Scene>();
 	SGE::FramebufferSpecification spec;
 	spec.Width = 1280;
 	spec.Height = 720;
 	m_Framebuffer = SGE::Framebuffer::CreateFramebuffer(spec);
 	m_ViewPortSize = { spec.Width, spec.Height };
-	m_SampleTexture = SGE::Texture2D::CreateTexture2D("assets/textures/dirt.jpg");
 	
 	// Configure UI Panels
 	{
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 	}
 
+	// TODO: REMOVE ALL OF THIS
 	// Spawn Entities
 	{
 		// cameras
 		SGE::Entity camera = m_Scene->CreateEntity("Main Camera", {0, 10, 0});
 		camera.AddComponent<SGE::Camera3DComponent>(true);
 		camera.AddComponent<SGE::NativeScriptComponent>().Bind<CameraController>();
-		camera.AddComponent<SGE::PointLightComponent>();
-		
-		// lights
-		SGE::Entity dirLight = m_Scene->CreateEntity("Directional Light", { 0.0, 100.0, 90});
-		dirLight.AddComponent<SGE::DirectionalLightComponent>();
-
-		// units
-		// TODO LOWER: MODEL SIZE
-		auto cubeModel = SGE::Model::CreateModel("assets/models/cube/cube.obj");
-		auto redCubeModel = SGE::Model::CreateModel("assets/models/red_cube/redcube.obj");
-		auto treeModel = SGE::Model::CreateModel("assets/models/tree/Lowpoly_tree_sample.obj");
-		auto barrelModel = SGE::Model::CreateModel("assets/models/barrel/wine_barrel_01_4k.obj", true);
-
-		{
-			SGE::Entity terrain = m_Scene->CreateEntity("Terrain", {0, 0, z - 5});
-			float sideLength = 1000;
-			terrain.GetComponent<SGE::TransformComponent>().Scale = {sideLength, 5, 1};
-			terrain.AddComponent<SGE::MeshRendererComponent>(cubeModel);
-			terrain.AddComponent<SGE::RigidBody2DComponent>();
-			terrain.AddComponent<SGE::BoxCollider2DComponent>();
-		}
-
-		{
-			std::string name = "tree";
-			SGE::Entity  e= m_Scene->CreateEntity(name, {-50, 10, z});
-			e.AddComponent<SGE::MeshRendererComponent>(treeModel);
-			auto& rb2d = e.AddComponent<SGE::RigidBody2DComponent>();
-			rb2d.Type = SGE::RigidBody2DComponent::BodyType::Dynamic;
-			e.AddComponent<SGE::BoxCollider2DComponent>();
-		}
-
-		// Set Up Scene
-		m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/deffered_shader.vert", "./assets/shaders/deffered_shader.frag");
-		m_SceneData.MainCamera = camera;
-
-		m_SceneData.DirectionalLight = dirLight;
-		m_SceneData.PointLights.push_back(camera);
-
-		SGE::Renderer::Configure(m_SceneData);
 	}
+
+	// Load Scene
+	SGE::SceneSerializer serializer(m_Scene);
+	serializer.Deserialize("assets/scenes/example.sge");
+
+	// Set Up Scene
+
+	// cameras
+	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/deffered_shader.vert", "./assets/shaders/deffered_shader.frag");
+	{
+		auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
+		for (auto e: view)
+		{
+			SGE::Entity entity{ e, m_Scene.get()};
+			m_SceneData.MainCamera = entity;
+			break;
+		}
+	}
+
+	// directional lights
+	auto view = m_Scene->Registry().view<SGE::DirectionalLightComponent>();
+	for (auto e: view)
+	{
+		SGE::Entity entity{ e, m_Scene.get()};
+		m_SceneData.DirectionalLight = entity;
+		break;
+	}
+
+	SGE::Renderer::Configure(m_SceneData);
 }
 
 void Sandbox2D::OnDetach()

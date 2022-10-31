@@ -9,6 +9,8 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Renderer/Framebuffer.h"
 
+#include "Scene/SceneSerializer.h"
+
 class Sandbox2D: public SGE::Layer
 {
 public:

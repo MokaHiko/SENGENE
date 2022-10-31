@@ -7,3 +7,6 @@
 [submodule "SGE/vendor/box2d"]
 	path = SGE/vendor/box2d
 	url = https://github.com/erincatto/box2d.git
+[submodule "SGE/vendor/yaml-cpp"]
+	path = SGE/vendor/yaml-cpp
+	url = https://github.com/tic-tacs/yaml-cpp.git

@@ -27,6 +27,8 @@ namespace SGE {
         static std::unordered_map<std::string, Ref<Texture2D>> m_Textures;
         static std::unordered_map<std::string, Ref<Material>> m_Materials;
         static std::unordered_map<std::string, Ref<Model>> m_Models;
+
+        friend class SceneSerializer;
     };
 }
 

@@ -59,8 +59,10 @@ namespace SGE {
     private:
         b2World* m_PhysicsWorld = nullptr;
     private:
-        friend class Entity;
         entt::registry m_Registry;
+        
+        friend class Entity;
+        friend class SceneSerializer;
     };
 }
 

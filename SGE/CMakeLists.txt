@@ -21,6 +21,7 @@ add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/Assimp)
 add_subdirectory(vendor/box2D)
+add_subdirectory(vendor/yaml-cpp)
 
 target_include_directories(${PROJECT_NAME} 
 	PUBLIC src
@@ -33,6 +34,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC vendor/imgui
 	PUBLIC vendor/Assimp/include
 	PUBLIC vendor/box2D/include
+	PUBLIC vendor/yaml-cpp/include
 	)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
@@ -42,5 +44,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	imgui
 	assimp
 	box2d
+	yaml-cpp
 	)
 
