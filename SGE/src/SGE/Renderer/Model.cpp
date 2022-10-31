@@ -5,6 +5,8 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/quaternion.hpp"
 
+#include "Renderer/ResourceManager.h"
+
 #define POSITION_LOCATION 0
 #define NORMAL_LOCATION 1
 #define TEX_COORD_LOCATION 2
@@ -37,7 +39,7 @@ namespace SGE {
 	
 	Ref<Model> Model::CreateModel(const std::string& modelPath, bool flipUVS)
 	{
-		return CreateRef<Model>(modelPath, flipUVS);
+		return ResourceManager::CreateModel(modelPath, flipUVS);
 	}
 	
 	void Model::AddInstance(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
@@ -224,26 +226,17 @@ namespace SGE {
 			// AMBIENT 
 			aiColor3D AmbientColor(0.0);
 			if(aiMaterial->Get(AI_MATKEY_COLOR_AMBIENT, AmbientColor) == AI_SUCCESS)
-			{
-				printf("Loaded Ambient Color: [%f, %f, %f]\n", AmbientColor.r, AmbientColor.g, AmbientColor.b);
 				m_Materials[i]->AmbientColor = {AmbientColor.r, AmbientColor.g, AmbientColor.b};
-			}
 
 			// DIFFUSE 
 			aiColor3D DiffuseColor(0.0);
 			if(aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
-			{
-				printf("Loaded Diffuse Color: [%f, %f, %f]\n", DiffuseColor.r, DiffuseColor.g, DiffuseColor.b);
 				m_Materials[i]->DiffuseColor = {DiffuseColor.r, DiffuseColor.g, DiffuseColor.b};
-			}
 
 			// TODO: SPECULAR
 			aiColor3D SpecularColor(0.0f);
 			if(aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, SpecularColor) == AI_SUCCESS)
-			{
-				printf("Loaded Specular Color: [%f, %f, %f]\n", SpecularColor.r, SpecularColor.g, SpecularColor.b);
 				m_Materials[i]->SpecularColor= {SpecularColor.r, SpecularColor.g, SpecularColor.b};
-			}
 		}
 		
 		return success;

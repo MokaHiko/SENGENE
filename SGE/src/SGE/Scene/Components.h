@@ -45,6 +45,8 @@ namespace SGE {
 
    struct TagComponent
    {
+      static const uint32_t MAX_TAG_SIZE = 128; // in bytes
+
       std::string Tag;
       TagComponent(const std::string& name)
          :Tag(name) {}

@@ -11,7 +11,6 @@
 
 Sandbox2D::~Sandbox2D()
 {
-	
 }
 
 void Sandbox2D::OnAttach()
@@ -31,7 +30,7 @@ void Sandbox2D::OnAttach()
 	{
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 	}
-	
+
 	// Spawn Entities
 	{
 		// cameras
@@ -60,32 +59,8 @@ void Sandbox2D::OnAttach()
 			terrain.AddComponent<SGE::BoxCollider2DComponent>();
 		}
 
-		dirLight.AddComponent<SGE::MeshRendererComponent>(cubeModel);
-
-		int root = 35;
-		int spacing = 10;
-		std::string name = "";
-		int ctr = 0;
-		for(int y = 0; y < root; y++)
 		{
-			for(int x = 0; x < root; x++)
-			{
-				ctr++;
-				name = "barrel" + std::to_string(ctr);
-				//SGE::Entity e = m_Scene->CreateEntity(name, {x * spacing * (rand() % 100) * 0.01  - (root * spacing / 2), y * spacing, z});
-				SGE::Entity e = m_Scene->CreateEntity(name, {x * spacing - (root * spacing / 2), y * spacing + 15, z});
-				e.AddComponent<SGE::MeshRendererComponent>(redCubeModel);
-				//e.GetComponent<SGE::TransformComponent>().Scale = glm::vec3{5};
-				e.GetComponent<SGE::TransformComponent>().Rotation.z = rand() % 360;
-
-				auto& rb2d = e.AddComponent<SGE::RigidBody2DComponent>();
-				rb2d.Type = SGE::RigidBody2DComponent::BodyType::Dynamic;
-				e.AddComponent<SGE::BoxCollider2DComponent>().RestitutionThreshold = 0.1f;
-			}
-		}
-
-		{
-			name = "tree";
+			std::string name = "tree";
 			SGE::Entity  e= m_Scene->CreateEntity(name, {-50, 10, z});
 			e.AddComponent<SGE::MeshRendererComponent>(treeModel);
 			auto& rb2d = e.AddComponent<SGE::RigidBody2DComponent>();
@@ -132,7 +107,7 @@ void Sandbox2D::OnUpdate(SGE::TimeStep ts)
 	m_Framebuffer->Bind();
 	SGE::Renderer::Begin();
 
-	// Update Scene ECS
+	// Update Scene ECS 	
 	m_Scene->Update(ts);
 
 	// Actual Rendering
@@ -245,10 +220,21 @@ void Sandbox2D::OnImGuiRender()
 
 	// Application Viewport of Dockspace
 	ImGui::Begin("View Port");
-	if (ImGui::Button("Play"))
+	static std::string runLabel = "Play";
+	if (ImGui::Button(runLabel.c_str()))
 	{
-		m_Scene->OnScenePlay();
+		if(m_Scene->m_SceneState == SGE::SCENE_STATE::PAUSE)
+		{
+			m_Scene->OnScenePlay(); 
+			runLabel = "Pause";
+		}
+		else
+		{
+			m_Scene->OnSceneStop();
+			runLabel = "Play";
+		}
 	}
+
 	uint32_t textureID = m_Framebuffer->GetColorAttachment();
 	ImGui::Image((void*)textureID, ImVec2(m_ViewPortSize.x, m_ViewPortSize.y), ImVec2(0,1), ImVec2(1,0));
 
@@ -306,7 +292,7 @@ void Sandbox2D::ShowFileMenuHierarchy()
 		}
 		ImGui::EndMenu();
 	}
-
+ 
 	// Here we demonstrate appending again to the "Options" menu (which we already created above)
 	// Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
 	// In a real code-base using it would make senses to use this feature from very different code locations.
@@ -315,7 +301,7 @@ void Sandbox2D::ShowFileMenuHierarchy()
 		static bool b = true;
 		ImGui::Checkbox("SomeOption", &b);
 		ImGui::EndMenu();
-	}
+	}	
 
 	if (ImGui::BeginMenu("Disabled", false)) // Disabled
 	{

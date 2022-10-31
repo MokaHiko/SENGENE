@@ -4,7 +4,7 @@
 #pragma once
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
-#include "Renderer/Mesh.h"
+#include "Renderer/Model.h"
 
 namespace SGE {
     class ResourceManager
@@ -19,11 +19,14 @@ namespace SGE {
         static Ref<Material> CreateMaterial(const std::string& name, const glm::vec3& ambientColor = glm::vec3(0.0f), const glm::vec3 diffuseColor = glm::vec3(0.0f), 
                                             const Ref<Texture2D>& diffuseTexture = nullptr, const Ref<Texture2D>& specularTexture = nullptr);
         static Ref<Material> GetMaterial(const std::string& name);
+
+	    static Ref<Model> CreateModel(const std::string& modelPath, bool flipUVS);
+	    static Ref<Model> GetModel(const std::string& name);
     private:
         static std::unordered_map<std::string, Ref<Shader>> m_Shaders;
         static std::unordered_map<std::string, Ref<Texture2D>> m_Textures;
-        static std::unordered_map<std::string, Ref<Mesh>> m_Meshes;
         static std::unordered_map<std::string, Ref<Material>> m_Materials;
+        static std::unordered_map<std::string, Ref<Model>> m_Models;
     };
 }
 

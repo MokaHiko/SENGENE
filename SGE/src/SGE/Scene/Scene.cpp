@@ -86,6 +86,8 @@ namespace SGE {
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
+		
+		m_SceneState = SCENE_STATE::PAUSE;
 	}
 
 	void Scene::Update(TimeStep timestep)
@@ -128,6 +130,10 @@ namespace SGE {
 					auto& rigidBody2D = group.get<RigidBody2DComponent>(entity);
 
 					b2Body* body = (b2Body*)(rigidBody2D.RuntimeBody);
+					
+					// Update Properties
+					body->SetType(SGERigidbody2DTypeToBox2D(rigidBody2D.Type));
+
 					const b2Vec2& position2D = body->GetPosition();
 
 					transform.Position.x = position2D.x;

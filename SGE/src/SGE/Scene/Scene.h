@@ -54,9 +54,10 @@ namespace SGE {
             return entity;
         }
         entt::registry& Registry() {return m_Registry;}
+        
+        SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;
     private:
         b2World* m_PhysicsWorld = nullptr;
-        SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;
     private:
         friend class Entity;
         entt::registry m_Registry;

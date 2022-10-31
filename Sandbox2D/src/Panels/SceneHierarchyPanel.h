@@ -20,11 +20,13 @@ namespace SGE{
         void DrawEntityNode(Entity entity);
         
         void ShowMenu();
-        void ShowComponents();
+        void ShowSelectedComponents();
     private:   
         ImGuiTreeNodeFlags m_TreeNodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool m_align_label_with_current_x_position = false;
 		bool m_test_drag_and_drop = false;
+
+        void ScenePopupWindows();
     private:
         Entity m_SelectedEntity;
         Ref<Scene> m_SceneContext; // TODO: SOME SORT OF WEAK PTR

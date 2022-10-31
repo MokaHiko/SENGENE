@@ -4,6 +4,7 @@ namespace SGE {
 	std::unordered_map<std::string, Ref<Shader>> ResourceManager::m_Shaders{};
 	std::unordered_map<std::string, Ref<Texture2D>> ResourceManager::m_Textures{};
     std::unordered_map<std::string, Ref<Material>> ResourceManager::m_Materials{};
+    std::unordered_map<std::string, Ref<Model>> ResourceManager::m_Models{};
 
 	Ref<Shader> ResourceManager::CreateShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
@@ -64,6 +65,23 @@ namespace SGE {
 			return m_Materials[name];
 
 		std::cout << "ERROR::RESOURCE: Material \"" << name << "\" does not exist! \n";
+		return nullptr;
+	}
+
+	Ref<Model> ResourceManager::CreateModel(const std::string& modelPath, bool flipUVS)
+	{
+		if(m_Models.find(modelPath) == m_Models.end())
+			m_Models[modelPath] = CreateRef<Model>(modelPath.c_str(), flipUVS);
+			
+		return m_Models[modelPath];
+	}	
+
+	Ref<Model> ResourceManager::GetModel(const std::string& name)
+	{
+		if(m_Models.find(name) != m_Models.end())
+			return m_Models[name];
+
+		std::cout << "ERROR::RESOURCE: Model \"" << name << "\" does not exist! \n";
 		return nullptr;
 	}
 }
