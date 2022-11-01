@@ -27,12 +27,15 @@ namespace SGE{
 		m_SceneData.SceneShader->SetInt("u_Material.texture_specular1", 1);
 
 		// directional lights
-		auto& dirLight = sceneData.DirectionalLight.GetComponent<DirectionalLightComponent>();
-		auto& dirLightTransform = sceneData.DirectionalLight.GetComponent<TransformComponent>();
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", -dirLightTransform.Position);
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Ambient", dirLight.Ambient);
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Diffuse", dirLight.Diffuse);
-		m_SceneData.SceneShader->SetVec3("u_DirLight.Specular", dirLight.Specular);
+		if (sceneData.DirectionalLight)
+		{
+			auto& dirLight = sceneData.DirectionalLight.GetComponent<DirectionalLightComponent>();
+			auto& dirLightTransform = sceneData.DirectionalLight.GetComponent<TransformComponent>();
+			m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", -dirLightTransform.Position);
+			m_SceneData.SceneShader->SetVec3("u_DirLight.Ambient", dirLight.Ambient);
+			m_SceneData.SceneShader->SetVec3("u_DirLight.Diffuse", dirLight.Diffuse);
+			m_SceneData.SceneShader->SetVec3("u_DirLight.Specular", dirLight.Specular);
+		}
 	}
 
 	void Renderer::Begin()

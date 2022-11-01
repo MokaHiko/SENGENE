@@ -26,6 +26,8 @@ public:
 
     glm::vec2 m_ViewPortSize = { 0.0f, 0.0f };
 private:
+    void LoadScene(const std::string& filePath);
+    void ResetScene();
     bool OnWindowResize(SGE::WindowResizeEvent& event);
 private:
     SGE::SceneHierarchyPanel m_SceneHierarchyPanel;

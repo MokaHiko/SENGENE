@@ -295,7 +295,7 @@ namespace SGE {
 
 		if (entity.HasComponent<Camera3DComponent>())
 		{
-			out << YAML::Key << "PointLightComponent";
+			out << YAML::Key << "Camera3DComponent";
 			out << YAML::BeginMap;
 
 			auto&  cam3DComponent = entity.GetComponent<Camera3DComponent>();

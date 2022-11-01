@@ -25,6 +25,8 @@ namespace SGE {
 
         void Resize(uint32_t width, uint32_t height);
         uint32_t GetColorAttachment() const;
+
+        const FramebufferSpecification& GetFrameBufferSpecification() const { return m_Specification; }
     private:
         void Clear();
 

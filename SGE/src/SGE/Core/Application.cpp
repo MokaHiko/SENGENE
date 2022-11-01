@@ -27,10 +27,7 @@ namespace SGE{
 		PushOverlay(m_ImGuiLayer);
 	}
 
-	Application::~Application()
-	{
-		
-	}
+	Application::~Application() {}
 	
 	void Application::Update(TimeStep timestep)
 	{

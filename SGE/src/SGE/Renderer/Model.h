@@ -46,12 +46,17 @@ namespace SGE {
     private:
         void LoadModel(const std::string& fileName, bool flipUVS);
 
+        // Structure
         bool ParseScene(const aiScene* scene, const std::string& fileName);
         bool ProcessMaterials(const aiScene* scene, const std::string& fileName);
         void ProcessMesh(const aiMesh* aiMesh);
 
         std::vector<Mesh> m_Meshes;
         std::vector<Ref<Material>>  m_Materials;
+
+        // Animation
+        void ProcessSingleBone(uint32_t index, aiBone* aiBone);
+
         void PopulateBuffers();
     private:
         // mesh property buffers

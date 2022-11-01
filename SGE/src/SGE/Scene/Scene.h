@@ -13,10 +13,10 @@ namespace SGE {
     struct SceneData
     {
         SceneData() 
-            :SceneWidth(1280), SceneHeight(720){}
+            :SceneWidth(1280), SceneHeight(720), MainCamera(), DirectionalLight() {}
 
         SceneData(Entity camera, uint32_t width = 1280, uint32_t height = 720) 
-            :MainCamera(camera), SceneWidth(width), SceneHeight(height){}
+            :MainCamera(camera), DirectionalLight(), SceneWidth(width), SceneHeight(height){}
         
         // Create Sort of Weak Ptr to replace raw *
         Entity MainCamera; 

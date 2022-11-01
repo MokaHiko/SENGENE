@@ -9,64 +9,15 @@
 #include <Core/Application.h>
 #include <imgui/imgui.h>
 
+#include "Utils/PlatformUtils.h"
+
 Sandbox2D::~Sandbox2D()
 {
 }
 
-void Sandbox2D::OnAttach()
+void Sandbox2D::OnAttach() 
 {
-	static const float z = -30;
-
-	// App/Settings Configuration
-	m_Scene = SGE::CreateRef<SGE::Scene>();
-	SGE::FramebufferSpecification spec;
-	spec.Width = 1280;
-	spec.Height = 720;
-	m_Framebuffer = SGE::Framebuffer::CreateFramebuffer(spec);
-	m_ViewPortSize = { spec.Width, spec.Height };
-	
-	// Configure UI Panels
-	{
-		m_SceneHierarchyPanel.SetContext(m_Scene);
-	}
-
-	// TODO: REMOVE ALL OF THIS
-	// Spawn Entities
-	{
-		// cameras
-		SGE::Entity camera = m_Scene->CreateEntity("Main Camera", {0, 10, 0});
-		camera.AddComponent<SGE::Camera3DComponent>(true);
-		camera.AddComponent<SGE::NativeScriptComponent>().Bind<CameraController>();
-	}
-
-	// Load Scene
-	SGE::SceneSerializer serializer(m_Scene);
-	serializer.Deserialize("assets/scenes/example.sge");
-
-	// Set Up Scene
-
-	// cameras
-	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/deffered_shader.vert", "./assets/shaders/deffered_shader.frag");
-	{
-		auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
-		for (auto e: view)
-		{
-			SGE::Entity entity{ e, m_Scene.get()};
-			m_SceneData.MainCamera = entity;
-			break;
-		}
-	}
-
-	// directional lights
-	auto view = m_Scene->Registry().view<SGE::DirectionalLightComponent>();
-	for (auto e: view)
-	{
-		SGE::Entity entity{ e, m_Scene.get()};
-		m_SceneData.DirectionalLight = entity;
-		break;
-	}
-
-	SGE::Renderer::Configure(m_SceneData);
+	LoadScene("assets/scenes/default.selfish");
 }
 
 void Sandbox2D::OnDetach()
@@ -231,6 +182,61 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::End();
 }
 
+void Sandbox2D::LoadScene(const std::string& filePath)
+{
+	// App/Settings Configuration
+	m_Scene = SGE::CreateRef<SGE::Scene>();
+	SGE::FramebufferSpecification spec{};
+	if (!m_Framebuffer)
+	{
+		spec.Width = 1280;
+		spec.Height = 720;
+	}
+	else
+	{
+		spec = m_Framebuffer->GetFrameBufferSpecification();
+	}
+
+	m_Framebuffer = SGE::Framebuffer::CreateFramebuffer(spec);
+	m_ViewPortSize = { spec.Width, spec.Height };
+
+	// Set UI Panels SceneContext
+	m_SceneHierarchyPanel.SetContext(m_Scene);
+
+	SGE::SceneSerializer serializer(m_Scene);
+	serializer.Deserialize(filePath);
+
+	ResetScene();
+	m_ViewPortSize = { spec.Width, spec.Height };
+}
+
+void Sandbox2D::ResetScene()
+{
+	// cameras
+	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/deffered_shader.vert", "./assets/shaders/deffered_shader.frag");
+	{
+		auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
+		for (auto e: view)
+		{
+			SGE::Entity entity{ e, m_Scene.get()};
+			m_SceneData.MainCamera = entity;
+			entity.AddComponent<SGE::NativeScriptComponent>().Bind<CameraController>();
+			break;
+		}
+	}
+
+	// directional lights
+	auto view = m_Scene->Registry().view<SGE::DirectionalLightComponent>();
+	for (auto e: view)
+	{
+		SGE::Entity entity{ e, m_Scene.get()};
+		m_SceneData.DirectionalLight = entity;
+		break;
+	}
+
+	SGE::Renderer::Configure(m_SceneData);
+}
+
 bool Sandbox2D::OnWindowResize(SGE::WindowResizeEvent& event)
 {
 	m_Framebuffer->Resize(event.GetWidth(), event.GetHeight());
@@ -240,7 +246,11 @@ bool Sandbox2D::OnWindowResize(SGE::WindowResizeEvent& event)
 void Sandbox2D::ShowFileMenuHierarchy()
 {
 	if (ImGui::MenuItem("New")) {}
-	if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+	if (ImGui::MenuItem("Open", "Ctrl+O")) {
+		std::string& filePath = SGE::FileDialogs::OpenFile("SENGINE Scene (*.selfish)\0*.selfish\0");
+		if(!filePath.empty())
+			LoadScene(filePath);
+	}
 	if (ImGui::BeginMenu("Open Recent"))
 	{
 		ImGui::MenuItem("fish_hat.c");
@@ -248,8 +258,20 @@ void Sandbox2D::ShowFileMenuHierarchy()
 		ImGui::MenuItem("fish_hat.h");
 		ImGui::EndMenu();
 	}
-	if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-	if (ImGui::MenuItem("Save As..")) {}
+	if (ImGui::MenuItem("Save", "Ctrl+S")) 
+	{
+		SGE::SceneSerializer serializer(m_Scene);
+		serializer.Serialize("assets/scenes/example.selfish");
+	}
+
+	if (ImGui::MenuItem("Save As..")) {
+		std::string& filePath = SGE::FileDialogs::SaveFile("SENGINE Scene (*.selfish)\0*.selfish\0");
+		if(!filePath.empty())
+		{
+			SGE::SceneSerializer serializer(m_Scene);
+			serializer.Serialize(filePath);
+		}
+	}
 
 	ImGui::Separator();
 	if (ImGui::BeginMenu("Options"))

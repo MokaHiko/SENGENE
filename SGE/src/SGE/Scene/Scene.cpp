@@ -15,6 +15,7 @@ namespace SGE {
 
 	Scene::~Scene()
 	{
+		delete m_PhysicsWorld;
 	}
 
 	b2BodyType SGERigidbody2DTypeToBox2D(RigidBody2DComponent::BodyType type)

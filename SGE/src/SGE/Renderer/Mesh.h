@@ -11,7 +11,7 @@ namespace SGE {
     struct Mesh
     {
     public:
-        Mesh() : m_NumIndices(0), m_BaseVertex(0), m_BaseIndex(0), m_MaterialIndex(0) {}
+        Mesh() : m_NumIndices(0), m_BaseVertex(0), m_BaseIndex(0), m_MaterialIndex(0), m_NumBones(0) {}
         ~Mesh(){}
 
         uint32_t NumIndices() const {return m_NumIndices;}
@@ -23,6 +23,7 @@ namespace SGE {
         uint32_t m_BaseVertex;
         uint32_t m_BaseIndex;
         uint32_t m_MaterialIndex;
+        uint32_t m_NumBones;
 
         friend class Model;
     };

@@ -138,16 +138,25 @@ namespace SGE {
 		// Assign mesh properties & count buffer sizes
 		uint32_t nVertices = 0;
 		uint32_t nIndices = 0;
+		uint32_t nTotalBones = 0;
 		for(uint32_t i = 0; i < m_Meshes.size(); i++)
 		{
 			m_Meshes[i].m_MaterialIndex = scene->mMeshes[i]->mMaterialIndex;
 			m_Meshes[i].m_NumIndices 	= scene->mMeshes[i]->mNumFaces * 3;
 			m_Meshes[i].m_BaseVertex 	= nVertices;
 			m_Meshes[i].m_BaseIndex  	= nIndices;
+			m_Meshes[i].m_NumBones 		= scene->mMeshes[i]->mNumBones;
 
 			nVertices += scene->mMeshes[i]->mNumVertices;
 			nIndices  += m_Meshes[i].m_NumIndices;
+			nTotalBones += m_Meshes[i].m_NumBones;
+
+			if(m_Meshes[i].m_NumBones > 0)
+				ProcessSingleBone(i, scene->mMeshes[i]->mBones[i]);
+			printf("Mesh: %s, bones: %d\n", scene->mMeshes[i]->mName.C_Str(), m_Meshes[i].m_NumBones);
 		}
+
+		printf("total bones on model: %d\n\n", nTotalBones);
 
 		// reserve buffers
 		m_Positions.reserve(nVertices);
@@ -221,7 +230,7 @@ namespace SGE {
 				}
 			}
 
-			// Specular Intesntiy (Shininess)
+			// Specular Intensity (Shininess)
 
 			// AMBIENT 
 			aiColor3D AmbientColor(0.0);
@@ -270,6 +279,15 @@ namespace SGE {
 		}
 	}
 	
+	void Model::ProcessSingleBone(uint32_t index, aiBone* aiBone)
+	{
+		for (uint32_t i = 0; i < aiBone->mNumWeights; i++)
+		{
+			const aiVertexWeight& vw = aiBone->mWeights[i];
+			printf(" %d vertex id %d weight %0.2f\n", i, vw.mVertexId, vw.mWeight);
+		}
+	}
+	
 	void Model::PopulateBuffers()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POSITION_VB]);
@@ -296,6 +314,7 @@ namespace SGE {
 		{
 			modelBuffer[i] = glm::mat4{1.0f};
 		}
+
 		glGenBuffers(1, &m_ModelTransformMatrixBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, m_ModelTransformMatrixBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * m_MaxInstances, modelBuffer, GL_DYNAMIC_DRAW);

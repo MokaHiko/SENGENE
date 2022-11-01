@@ -4,7 +4,10 @@
 #include "Renderer/ResourceManager.h"
 namespace SGE {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
-		:m_SceneContext(scene) {}
+		:m_SceneContext(scene) 
+	{
+		m_SelectedEntity = {};
+	}
 
 	SceneHierarchyPanel::~SceneHierarchyPanel() {}
 
@@ -41,6 +44,7 @@ namespace SGE {
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& scene)
 	{
 		m_SceneContext = scene;
+		m_SelectedEntity = {};
 	}
 	
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)

@@ -17,6 +17,9 @@ namespace SGE {
         template <typename T, typename ... Args>
         T& AddComponent(Args&& ... args)
         {
+            if (HasComponent<T>())
+                GetComponent<T>();
+
             return m_Scene->Registry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
         }
 
