@@ -16,6 +16,9 @@ namespace SGE{
 
 		m_RendererID = CreateProgram(vertexShader, fragmentShader);
 
+		printf("Shader::Vertex %s Loaded\n", vertexPath.c_str());
+		printf("Shader::Fragment %s Loaded\n",fragmentPath.c_str());
+
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 	}
@@ -55,12 +58,17 @@ namespace SGE{
 		glUniform1f(glGetUniformLocation(m_RendererID, name.c_str()), value);
 	}
 	
-	void Shader::SetMat4(const std::string& name, const glm::mat4& value)
+	void Shader::SetMat4(const std::string& name, const glm::mat4& value) const
 	{
 		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void Shader::SetVec3(const std::string& name, const glm::vec3& value)
+	void Shader::SetMat4Array(const std::string& name, const std::vector<glm::mat4>& value) const
+	{
+		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, name.c_str()), static_cast<int32_t>(value.size()), GL_FALSE, glm::value_ptr(value[0]));
+	}
+
+	void Shader::SetVec3(const std::string& name, const glm::vec3& value) const
 	{
 		glUniform3f(glGetUniformLocation(m_RendererID, name.c_str()), value.x, value.y, value.z);
 	}
@@ -101,7 +109,7 @@ namespace SGE{
 		std::ifstream file;
 
 		// vertex shader
-		uint32_t shader;
+		uint32_t shader = -1;
 		file.open(shaderPath, std::ios::ate | std::ios::binary);
 
 		if(!file.is_open())

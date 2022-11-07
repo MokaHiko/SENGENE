@@ -104,7 +104,8 @@ namespace SGE {
 			throw std::runtime_error("Failed to load scene");
 		
 		std::string sceneName = data["Scene"].as<std::string>();
-
+		m_Scene->m_Name = sceneName;
+		
 		auto entities = data["Entities"];
 		if(entities)
 		{

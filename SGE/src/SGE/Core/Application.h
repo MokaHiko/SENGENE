@@ -26,6 +26,7 @@ namespace SGE{
         static Application& Get() {return *s_Instance;}
         inline Window& GetWindow() {return *m_Window;}
         void Run();
+        void ShutDown();
     private:
         void OnEvent(Event& event);
         bool OnWindowResize(WindowResizeEvent& event);

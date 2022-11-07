@@ -85,11 +85,15 @@ namespace SGE{
 			float time = (float)glfwGetTime();
 			TimeStep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
-			m_Window->SetWindowTitle(std::to_string(timestep.GetMilliSeconds()));
 			
 			Update(timestep);
 
 			m_Window->OnUpdate();
 		}
+	}
+	
+	void Application::ShutDown()
+	{
+		m_Running = false;
 	}
 }

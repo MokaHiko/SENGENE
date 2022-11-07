@@ -5,7 +5,7 @@
 namespace SGE{
     std::unordered_set <Ref<Model>> Renderer::m_Models;
 	SceneData Renderer::m_SceneData{};
-
+	
 	Renderer::Renderer(){}
 	void Renderer::Init()
 	{
@@ -40,25 +40,26 @@ namespace SGE{
 
 	void Renderer::Begin()
 	{
+		// Clear Screen
 		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Bind Camera Properties
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), (float)m_SceneData.SceneWidth / (float)m_SceneData.SceneHeight, 0.1f, 1000.0f);
 		auto& camera = m_SceneData.MainCamera.GetComponent<Camera3DComponent>();
 		auto& cameraPosition = m_SceneData.MainCamera.GetComponent<TransformComponent>();
 
-		// Configure Cameras
 		m_SceneData.SceneShader->Bind();
 		m_SceneData.SceneShader->SetMat4("projection", projectionMatrix);
 		m_SceneData.SceneShader->SetMat4("view", camera.camera.GetViewMatrix());
-
 		m_SceneData.SceneShader->SetVec3("u_MainCameraPos", cameraPosition.Position);
 
-		// Directional Light
+		// Bind Directional Light Properties
 		m_SceneData.SceneShader->SetVec3("u_DirLight.Direction", -m_SceneData.DirectionalLight.GetComponent<TransformComponent>().Position);
 		
-		// Point Lights
+		// Bind Point Lights Properties
 		int ctr = 0;
+		m_SceneData.SceneShader->SetInt("u_NPointLights", m_SceneData.PointLights.size());
 		for(Entity pl: m_SceneData.PointLights)
 		{
 			PointLightComponent& pointLight = pl.GetComponent<PointLightComponent>();
@@ -75,8 +76,9 @@ namespace SGE{
 			m_SceneData.SceneShader->SetFloat(std::string("u_PointLights[" + index + "].Quadratic"), pointLight.Quadratic);
 			ctr++;
 		}
-		
-		m_SceneData.SceneShader->SetInt("u_NPointLights", m_SceneData.PointLights.size());
+
+		// Gizmos
+		m_SceneData.SceneShader->SetInt("u_FocusedBoneIndex", m_SceneData.FocusedBoneIndex);
 	}
 
 	void Renderer::End()

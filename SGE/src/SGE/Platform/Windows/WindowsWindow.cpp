@@ -22,10 +22,9 @@ namespace SGE {
 		glfwMakeContextCurrent(m_Window);
 
 		// init glad after making WindowsWindow current context
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 			throw std::runtime_error("Failed to load glad");
-		}
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {

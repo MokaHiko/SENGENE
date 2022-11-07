@@ -17,7 +17,12 @@ Sandbox2D::~Sandbox2D()
 
 void Sandbox2D::OnAttach() 
 {
-	LoadScene("assets/scenes/default.selfish");
+	// Load Engine Resources
+	SGE::Application::Get().GetWindow().SetWindowTitle("Sandbox 2D");
+	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/phong_instanced_shader.vert", "./assets/shaders/phong_instanced_shader.frag");
+	//m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/gizmo_instanced_shader.vert", "./assets/shaders/gizmo_instanced_shader.frag");
+
+	LoadScene("assets/scenes/example.selfish");
 }
 
 void Sandbox2D::OnDetach()
@@ -180,6 +185,15 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Image((void*)textureID, ImVec2(m_ViewPortSize.x, m_ViewPortSize.y), ImVec2(0,1), ImVec2(1,0));
 
 	ImGui::End();
+
+	ImGui::Begin("Gizmos Control");
+	std::string boneIndex = "Change Focused Bone: " +  std::to_string(m_SceneData.FocusedBoneIndex);
+	if(ImGui::Button(boneIndex.c_str()))
+	{
+		m_SceneData.FocusedBoneIndex += 1;
+		SGE::Renderer::Configure(m_SceneData);
+	}
+	ImGui::End();
 }
 
 void Sandbox2D::LoadScene(const std::string& filePath)
@@ -189,8 +203,8 @@ void Sandbox2D::LoadScene(const std::string& filePath)
 	SGE::FramebufferSpecification spec{};
 	if (!m_Framebuffer)
 	{
-		spec.Width = 1280;
-		spec.Height = 720;
+		spec.Width = 2560;
+		spec.Height = 1080;
 	}
 	else
 	{
@@ -213,7 +227,6 @@ void Sandbox2D::LoadScene(const std::string& filePath)
 void Sandbox2D::ResetScene()
 {
 	// cameras
-	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/deffered_shader.vert", "./assets/shaders/deffered_shader.frag");
 	{
 		auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
 		for (auto e: view)
@@ -243,6 +256,7 @@ bool Sandbox2D::OnWindowResize(SGE::WindowResizeEvent& event)
 	m_ViewPortSize = { event.GetWidth(), event.GetHeight() };
 	return false;
 }
+
 void Sandbox2D::ShowFileMenuHierarchy()
 {
 	if (ImGui::MenuItem("New")) {}
@@ -320,5 +334,5 @@ void Sandbox2D::ShowFileMenuHierarchy()
 		IM_ASSERT(0);
 	}
 	if (ImGui::MenuItem("Checked", NULL, true)) {}
-	if (ImGui::MenuItem("Quit", "Alt+F4")) {}
+	if (ImGui::MenuItem("Quit", "Alt+F4")) {SGE::Application::Get().ShutDown();}
 }

@@ -18,7 +18,7 @@ namespace SGE {
 		
 		ImGui::Begin("Scene Hierarchy");
 		ImGui::SetNextItemOpen(true);
-		if (ImGui::TreeNode("Scene"))
+		if (ImGui::TreeNode(m_SceneContext->GetSceneName().c_str()))
 		{
 			ScenePopupWindows();
 

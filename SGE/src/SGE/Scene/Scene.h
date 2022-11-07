@@ -13,10 +13,10 @@ namespace SGE {
     struct SceneData
     {
         SceneData() 
-            :SceneWidth(1280), SceneHeight(720), MainCamera(), DirectionalLight() {}
+            :SceneWidth(1280), SceneHeight(720), MainCamera(), DirectionalLight(), FocusedBoneIndex(0) {}
 
         SceneData(Entity camera, uint32_t width = 1280, uint32_t height = 720) 
-            :MainCamera(camera), DirectionalLight(), SceneWidth(width), SceneHeight(height){}
+            :MainCamera(camera), DirectionalLight(), FocusedBoneIndex(0), SceneWidth(width), SceneHeight(height){}
         
         // Create Sort of Weak Ptr to replace raw *
         Entity MainCamera; 
@@ -25,6 +25,9 @@ namespace SGE {
 
         uint32_t SceneWidth;
         uint32_t SceneHeight;
+
+        // Gizmos
+        uint32_t FocusedBoneIndex;
 
         Ref<Shader> SceneShader = nullptr;
     };
@@ -38,7 +41,7 @@ namespace SGE {
     class Scene
     {
     public:
-        Scene();
+        Scene(const std::string& sceneName = "Scene");
         ~Scene();
 
         void Update(TimeStep timestep);
@@ -56,10 +59,13 @@ namespace SGE {
         entt::registry& Registry() {return m_Registry;}
         
         SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;
+
+        inline const std::string& GetSceneName() const {return m_Name;}
     private:
         b2World* m_PhysicsWorld = nullptr;
     private:
         entt::registry m_Registry;
+        std::string m_Name;
         
         friend class Entity;
         friend class SceneSerializer;

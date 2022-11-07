@@ -9,9 +9,8 @@
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_fixture.h>
 namespace SGE {
-	Scene::Scene()
-	{
-	}
+	Scene::Scene(const std::string& sceneName)
+		:m_Name(sceneName) {}
 
 	Scene::~Scene()
 	{
@@ -113,7 +112,7 @@ namespace SGE {
 						nsc.ScriptInstance->OnStart();
 					}
 					
-					// implment script
+					// implment scripts
 					nsc.ScriptInstance->OnUpdate(timestep);
 				}
 			}

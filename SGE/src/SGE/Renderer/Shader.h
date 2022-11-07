@@ -28,8 +28,9 @@ namespace SGE{
         void SetBool(const std::string& name,  bool value);
         void SetInt(const std::string& name,  int value);
         void SetFloat(const std::string& name, float value);
-        void SetMat4(const std::string& name, const glm::mat4& value);
-	    void SetVec3(const std::string& name, const glm::vec3& value);
+        void SetMat4(const std::string& name, const glm::mat4& value) const;
+        void SetMat4Array(const std::string& name, const std::vector<glm::mat4>& value) const;
+	    void SetVec3(const std::string& name, const glm::vec3& value) const;
     private:
         uint32_t CompileShaders(const char* shaderCode, ShaderType type);
         std::vector<char> ReadFile(const std::string& shaderPath);

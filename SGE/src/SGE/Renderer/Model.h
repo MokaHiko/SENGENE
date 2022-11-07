@@ -13,67 +13,137 @@
 #include "Renderer/Texture.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/Shader.h"
+#include "Core/TimeStep.h"
 
 namespace SGE {
+    static const uint32_t MAX_NUM_BONES_PER_VERTEX = 4;
+
+    struct BoneInfo
+    {
+        BoneInfo(const glm::mat4& offset)
+        {
+            OffsetMatrix = offset;
+            FinalTransformationMatrix = glm::mat4(0.0f);
+        }
+
+        glm::mat4 OffsetMatrix{ 1.0f };                 // local to bone space
+        glm::mat4 FinalTransformationMatrix{ 1.0f };    // local space matrix after animation
+    };
+
+    struct VertexBoneData 
+    {
+        VertexBoneData() {}
+
+        void AddBoneData(int boneID, float weight)
+        {
+            for(int i = 0; i < MAX_NUM_BONES_PER_VERTEX; i++)
+            {
+                if(Weights[i] == 0.0f) 
+                {
+                    BoneIDS[i] = boneID;
+                    Weights[i] = weight;
+                    return;
+                }
+            }
+            assert(0);  // Should Never Reach More than Alloted Space for Bones
+        }
+
+        int BoneIDS[MAX_NUM_BONES_PER_VERTEX] = {};
+        float Weights[MAX_NUM_BONES_PER_VERTEX] = {};
+    };
+
     class Model
     {
     private:
         enum BUFFER_TYPE
         {
-            INDEX_BUFFER = 0,
-            POSITION_VB = 1,
+            POSITION_VB = 0,
+            INDEX_BUFFER = 1,
             TEXCOORD_VB = 2,
             NORMAL_VB = 3,
+            BONE_VB = 4,
 
-            NUM_BUFFERS = 4
+            NUM_BUFFERS = 5
         };
-
     public:
         Model(const std::string& modelPath, bool flipUVS = false);
         ~Model();
 
         static Ref<Model> CreateModel(const std::string& modelPath, bool flipUVS = false);
+
+        // - Rendering
         void AddInstance(const glm::vec3& position = glm::vec3{1.0}, const glm::vec3& rotation = glm::vec3{0.0f}, const glm::vec3& scale = glm::vec3{1.0f});
         void Render(const Ref<Shader> shader);
-
-        void Clear();
 	    void DrawMesh(const Mesh& mesh);
+        void Clear();
 
+        // - Panel Interface
         const std::vector<Ref<Material>>& GetMaterials() const {return m_Materials;}
-        
-        uint32_t GetNMaterials() const {return m_Materials.size();}
-        uint32_t GetNMeshes() const {return m_Meshes.size();}
+        uint32_t GetNMaterials() const {return static_cast<uint32_t>(m_Materials.size());}
+        uint32_t GetNMeshes() const {return static_cast<uint32_t>(m_Meshes.size());}
     private:
+        // - Model Loading
         void LoadModel(const std::string& fileName, bool flipUVS);
-
-        // Structure
-        bool ParseScene(const aiScene* scene, const std::string& fileName);
+        bool ProcessScene(const aiScene* scene, const std::string& fileName);
         bool ProcessMaterials(const aiScene* scene, const std::string& fileName);
-        void ProcessMesh(const aiMesh* aiMesh);
+        void ProcessMesh(const aiMesh* pMesh);
+	    void ProcessNodeHierarchy(const aiNode* pNode, const glm::mat4& parentTransform, float timeInTicks);
 
-        std::vector<Mesh> m_Meshes;
-        std::vector<Ref<Material>>  m_Materials;
+        // - Animation
+        void ProcessMeshBones(uint32_t meshIndex, const aiMesh* pMesh);
+        void ProcessSingleBone(uint32_t meshIndex, aiBone* pBone);
+        int GetBoneID(const aiBone* pBone);
+        void GetBoneTransforms(std::vector<glm::mat4>& Transforms, float animationTime);
+        const aiNodeAnim* GetNodeAnim(const aiAnimation* pAnimation, const std::string& nodeName);
 
-        // Animation
-        void ProcessSingleBone(uint32_t index, aiBone* aiBone);
+        void InterpolateScale(glm::vec3& scale, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
+        uint32_t FindScaling(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
+        void InterpolateRotation(aiQuaternion& rotation, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
+        uint32_t FindRotation(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
+        void InterpolateTranslation(glm::vec3& translation, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
+        uint32_t FindTranslation(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
 
+        // - Helper
+        const glm::mat4 AssimpToGlmMatrix(const aiMatrix4x4& matrix);
+
+        // - Buffers
         void PopulateBuffers();
     private:
-        // mesh property buffers
-        std::vector<glm::vec3> m_Positions;
-        std::vector<glm::vec3> m_Normals;
-        std::vector<glm::vec2> m_TexCoords;
+        // Assimp Structures
+        Assimp::Importer m_Importer{};
+        const aiScene* m_aiScene = nullptr;
 
-        std::vector<uint32_t> m_Indices;
+        // Model Structures
+        std::vector<Mesh> m_Meshes{};
+        std::vector<Ref<Material>>  m_Materials{};
 
-        std::vector<uint32_t> m_Buffers;
+        // Bone Structures
+        std::vector<glm::mat4> m_BoneTransforms{};
+        std::vector<VertexBoneData> m_Bones{};
+        std::vector<BoneInfo> m_BoneInfos{};
+        std::map<std::string, uint32_t> m_BoneNamesToIndex{};
+        glm::mat4 m_GlobalInverseTransform{ 1.0f };
+
+        // Local Model Vertex Buffers (each mesh)
+        std::vector<glm::vec3> m_Positions{};
+        std::vector<glm::vec3> m_Normals{};
+        std::vector<glm::vec2> m_TexCoords{};
+
+        // Local Model Transform Buffers (each instance)
+        uint32_t m_ModelTransformMatrixBuffer;
+
+        // Local Model Index Buffer
+        std::vector<uint32_t> m_Indices{};
+
+        // GPU Buffer Handles
+        std::vector<uint32_t> m_Buffers{};
     private:
-        uint32_t m_MaxInstances = 10000;
+        // Renderer Config
+        uint32_t m_MaxInstances = 1000;
         uint32_t m_NumInstances = 0;
 
-        // model buffers
-        uint32_t m_ModelTransformMatrixBuffer;
-        uint32_t m_RendererID;
+        // Model RendererID
+        uint32_t m_RendererID = 0;
     };
 }
 
