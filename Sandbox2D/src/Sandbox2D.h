@@ -41,6 +41,10 @@ private:
     SGE::Ref<SGE::Texture2D> m_SampleTexture;
 
     SGE::Ref<SGE::Model> m_Model;
+
+private:
+    // - Widgets Data
+    float m_FrameTime = 0;
 };
 
 #endif

@@ -28,8 +28,6 @@ namespace SGE {
 
         // Gizmos
         uint32_t FocusedBoneIndex;
-
-        Ref<Shader> SceneShader = nullptr;
     };
 
     enum class SCENE_STATE 
@@ -56,6 +54,32 @@ namespace SGE {
             entity.AddComponent<TransformComponent>(position);
             return entity;
         }
+
+        Entity CreateEntity(Entity otherEntity, const std::string& name = "UNNAMED_ENTITY")
+        {
+            Entity entity = { m_Registry.create(), this };
+
+            auto& transform = entity.AddComponent<TransformComponent>();
+            transform = otherEntity.GetComponent<TransformComponent>();
+
+            if (otherEntity.HasComponent<TagComponent>())
+                entity.AddComponent<TagComponent>(otherEntity.GetComponent<TagComponent>().Tag);
+
+            if (otherEntity.HasComponent<MeshRendererComponent>())
+                entity.AddComponent<MeshRendererComponent>(otherEntity.GetComponent<MeshRendererComponent>().Model);
+
+            if (otherEntity.HasComponent<SkinnedMeshRendererComponent>())
+                entity.AddComponent<SkinnedMeshRendererComponent>(otherEntity.GetComponent<SkinnedMeshRendererComponent>().AnimatedModel);
+
+            if (otherEntity.HasComponent<BoxCollider2DComponent>())
+                entity.AddComponent<BoxCollider2DComponent>(otherEntity.GetComponent<BoxCollider2DComponent>());
+
+            if (otherEntity.HasComponent<RigidBody2DComponent>())
+                entity.AddComponent<RigidBody2DComponent>(otherEntity.GetComponent<RigidBody2DComponent>());
+
+            return entity;
+        }
+
         entt::registry& Registry() {return m_Registry;}
         
         SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;

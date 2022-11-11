@@ -20,7 +20,7 @@ namespace SGE {
 		ImGui::SetNextItemOpen(true);
 		if (ImGui::TreeNode(m_SceneContext->GetSceneName().c_str()))
 		{
-			ScenePopupWindows();
+			//ScenePopupWindows();
 
 			// Scene Hierarchy
 			if (m_align_label_with_current_x_position)
@@ -29,6 +29,7 @@ namespace SGE {
 			auto view = m_SceneContext->Registry().view<TagComponent>();
 			for(auto e : view)
 				DrawEntityNode(Entity{e, m_SceneContext.get()});
+			EntityPopupWindows();
 
 			if (m_align_label_with_current_x_position)
 				ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
@@ -49,6 +50,7 @@ namespace SGE {
 	
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
+        if (ImGui::GetIO().MouseClicked[1] && ImGui::IsItemHovered()) {ImGui::OpenPopup("EntityPopUp");}
 		// Disable the default "open on single-click behavior" + set Selected flag according to our selection.
 		// To alter selection we use IsItemClicked() && !IsItemToggledOpen(), so clicking on an arrow doesn't alter selection.
 		ImGuiTreeNodeFlags node_flags = m_TreeNodeFlags;
@@ -61,6 +63,7 @@ namespace SGE {
 		bool node_open = ImGui::TreeNodeEx(tag.Tag.c_str(), node_flags, "%s", tag.Tag.c_str());
 		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			m_SelectedEntity = entity;
+
 		if (m_test_drag_and_drop && ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
@@ -156,33 +159,70 @@ namespace SGE {
 					}
 				}
 			}
-			
-			if(m_SelectedEntity.HasComponent<RigidBody2DComponent>())
-			{
-				if (ImGui::CollapsingHeader("RigidBody Component"))
-				{
-					static float rate = 0.2f;
-					auto& rb = m_SelectedEntity.GetComponent<RigidBody2DComponent>();
-					switch (rb.Type)
-					{
-						case RigidBody2DComponent::BodyType::Static:
-							ImGui::Text("Static");
-							break;
-						case RigidBody2DComponent::BodyType::Dynamic:
-							ImGui::Text("Dynamic");
-							break;
-						case RigidBody2DComponent::BodyType::Kinematic:
-							ImGui::Text("Kinematic");
-							break;
-						default:
-							ImGui::Text("Uknown Body Type");
-							break;
-					};
+		}
 
-					if (ImGui::RadioButton("Static", rb.Type == RigidBody2DComponent::BodyType::Static)) { rb.Type = RigidBody2DComponent::BodyType::Static; } ImGui::SameLine();
-					if (ImGui::RadioButton("Dynamic", rb.Type == RigidBody2DComponent::BodyType::Dynamic)) { rb.Type = RigidBody2DComponent::BodyType::Dynamic; } ImGui::SameLine();
-					if (ImGui::RadioButton("Kinematic", rb.Type == RigidBody2DComponent::BodyType::Kinematic)) { rb.Type = RigidBody2DComponent::BodyType::Kinematic; } ImGui::SameLine();
+		if(m_SelectedEntity.HasComponent<SkinnedMeshRendererComponent>())
+		{ 
+			if (ImGui::CollapsingHeader("Skinned Mesh Renderer"))
+			{
+				auto& model = m_SelectedEntity.GetComponent<SkinnedMeshRendererComponent>().AnimatedModel;
+
+				ImGui::Text("Meshes : %d", model->GetNMeshes());
+				ImGui::Text("Draw Calls: %d", model->GetNMaterials());	
+
+				ImGui::Separator();
+				ImGui::Text("Materials: %d", model->GetNMaterials());
+				ImVec2 panelSize = ImGui::GetWindowContentRegionMax(); panelSize.x /= 2; panelSize.y /= 6;
+
+				for(const auto& material : model->GetMaterials())
+				{
+					ImGui::Text("%s", material->Name.c_str());
+					ImGui::ColorEdit3("Ambient", glm::value_ptr(material->AmbientColor), ImGuiColorEditFlags_NoInputs);
+					ImGui::SameLine();
+					ImGui::ColorEdit3("Diffuse", glm::value_ptr(material->DiffuseColor), ImGuiColorEditFlags_NoInputs);
+					ImGui::SameLine();
+					ImGui::ColorEdit3("Specular", glm::value_ptr(material->SpecularColor), ImGuiColorEditFlags_NoInputs);
+
+					if (material->DiffuseTexture)
+					{
+						ImGui::Text("Diffuse Texture");
+						ImGui::Image((void*)material->DiffuseTexture->GetID(), panelSize, ImVec2(0,1), ImVec2(1,0));
+					}
+					if (material->SpecularTexture)
+					{
+						ImGui::SameLine();
+						ImGui::Text("Specular Texture"); 
+						ImGui::Image((void*)material->SpecularTexture->GetID(), panelSize, ImVec2(0,1), ImVec2(1,0));
+					}
 				}
+			}
+		}
+		
+		if(m_SelectedEntity.HasComponent<RigidBody2DComponent>())
+		{
+			if (ImGui::CollapsingHeader("RigidBody Component"))
+			{
+				static float rate = 0.2f;
+				auto& rb = m_SelectedEntity.GetComponent<RigidBody2DComponent>();
+				switch (rb.Type)
+				{
+					case RigidBody2DComponent::BodyType::Static:
+						ImGui::Text("Static");
+						break;
+					case RigidBody2DComponent::BodyType::Dynamic:
+						ImGui::Text("Dynamic");
+						break;
+					case RigidBody2DComponent::BodyType::Kinematic:
+						ImGui::Text("Kinematic");
+						break;
+					default:
+						ImGui::Text("Uknown Body Type");
+						break;
+				};
+
+				if (ImGui::RadioButton("Static", rb.Type == RigidBody2DComponent::BodyType::Static)) { rb.Type = RigidBody2DComponent::BodyType::Static; } ImGui::SameLine();
+				if (ImGui::RadioButton("Dynamic", rb.Type == RigidBody2DComponent::BodyType::Dynamic)) { rb.Type = RigidBody2DComponent::BodyType::Dynamic; } ImGui::SameLine();
+				if (ImGui::RadioButton("Kinematic", rb.Type == RigidBody2DComponent::BodyType::Kinematic)) { rb.Type = RigidBody2DComponent::BodyType::Kinematic; } ImGui::SameLine();
 			}
 		}
 
@@ -201,7 +241,6 @@ namespace SGE {
 						if(!m_SelectedEntity.HasComponent<MeshRendererComponent>())
 							m_SelectedEntity.AddComponent<MeshRendererComponent>(ResourceManager::GetModel("assets/models/cube/cube.obj"));
 					}
-
 					ImGui::EndMenu();
 				}
 
@@ -231,10 +270,10 @@ namespace SGE {
     void SceneHierarchyPanel::ScenePopupWindows()
 	{
 		 // Showing a menu with toggles
-        if (ImGui::GetIO().MouseClicked[1] && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow) 
-			&& ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow)) {ImGui::OpenPopup("my_toggle_popup");}
+        if (ImGui::GetIO().MouseClicked[1] && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow)
+			&& ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow)) {ImGui::OpenPopup("SceneHierarchyPopUp");}
 
-        if (ImGui::BeginPopup("my_toggle_popup"))
+        if (ImGui::BeginPopup("SceneHierarchyPopUp"))
         {
             if (ImGui::BeginMenu("Add Entity"))
             {
@@ -273,6 +312,16 @@ namespace SGE {
                 }
                 ImGui::EndPopup();
             }
+            ImGui::EndPopup();
+        }
+	}
+	void SceneHierarchyPanel::EntityPopupWindows()
+	{
+        if (ImGui::BeginPopup("EntityPopUp"))
+        {
+			if (ImGui::Button("Duplicate Entity"))
+				m_SceneContext->CreateEntity(m_SelectedEntity);
+
             ImGui::EndPopup();
         }
 	}

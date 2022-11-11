@@ -29,6 +29,7 @@ namespace SGE{
     private:
         static std::unordered_set <Ref<Model>> m_Models;
         static SceneData m_SceneData;
+        static Ref<Shader> m_Shader;
     };
 }
 

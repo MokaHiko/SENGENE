@@ -43,5 +43,6 @@ void main()
 	v_BoneIDs = a_BoneIDs;
 	v_Weights = a_Weights;
 	
-	gl_Position = projection * view * a_ModelMatrix * boneTransform * vec4(a_Position, 1.0f);
+	vec4 position = boneTransform * vec4(a_Position, 1.0f);
+	gl_Position = projection * view * a_ModelMatrix * position;
 }

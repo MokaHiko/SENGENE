@@ -14,7 +14,7 @@ namespace SGE {
 		unsigned char* data = stbi_load(path, &width, &height, &nChannels, 0);
 		if(!data)
 		{
-			std::cout << "Failed to load image: " << path << "\n";
+			std::cout << "TEXTURE::ERROR:: Failed to Load Image: " << path << "\n";
 			stbi_image_free(data);
 			return;
 		}

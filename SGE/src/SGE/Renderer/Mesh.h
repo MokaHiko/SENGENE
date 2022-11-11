@@ -26,6 +26,7 @@ namespace SGE {
         uint32_t m_NumBones;
 
         friend class Model;
+        friend class AnimatedModel;
     };
 
     struct Material

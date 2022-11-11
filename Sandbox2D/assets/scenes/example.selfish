@@ -9,13 +9,63 @@ Entities:
       Scale: [1, 1.39999998, 1]
   - Entity: 42312412
     TagComponent:
-      Tag: XBot
+      Tag: XBot2
     TransformComponent:
-      Position: [-49.9991035, 2.61792827, -30]
+      Position: [-50, 0, -30]
       Rotation: [0, 0, 0.00131924055]
       Scale: [0.200000003, 0.200000003, 0.200000003]
-    MeshRendererComponent:
-      Path: assets/models/XBot/XBot.fbx
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
+    RigidBody2DComponent:
+      BodyType: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Scale: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+  - Entity: 42312412
+    TagComponent:
+      Tag: SomeTestCube
+    TransformComponent:
+      Position: [-3.4000001, 18.3999996, 0.400000006]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1.39999998, 1]
+  - Entity: 42312412
+    TagComponent:
+      Tag: XBot1
+    TransformComponent:
+      Position: [0, 0, -30]
+      Rotation: [0, 0, 0.00131924055]
+      Scale: [0.200000003, 0.200000003, 0.200000003]
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
+    RigidBody2DComponent:
+      BodyType: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Scale: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+  - Entity: 42312412
+    TagComponent:
+      Tag: SomeTestCube
+    TransformComponent:
+      Position: [-3.4000001, 18.3999996, 0.400000006]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1.39999998, 1]
+  - Entity: 42312412
+    TagComponent:
+      Tag: XBot
+    TransformComponent:
+      Position: [50, 0, -30]
+      Rotation: [0, 0, 0.00131924055]
+      Scale: [0.200000003, 0.200000003, 0.200000003]
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
     RigidBody2DComponent:
       BodyType: 0
     BoxCollider2DComponent:
@@ -29,9 +79,11 @@ Entities:
     TagComponent:
       Tag: Terrain
     TransformComponent:
-      Position: [0, 0, -35]
+      Position: [3, -43.5999985, -413.600006]
       Rotation: [0, 0, 0]
-      Scale: [1000, 5, 1]
+      Scale: [1000, 40.5999985, 800]
+    MeshRendererComponent:
+      Path: assets/models/cube/cube.obj
     RigidBody2DComponent:
       BodyType: 0
     BoxCollider2DComponent:
@@ -45,7 +97,7 @@ Entities:
     TagComponent:
       Tag: Directional Light
     TransformComponent:
-      Position: [0, 14.1999998, 90]
+      Position: [0, 119.199997, 168.800003]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     DirectionalLightComponent:
@@ -56,8 +108,62 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Position: [-63.8191872, 73.2499847, 4.07974052]
+      Position: [34.1230011, 15.7309999, 108.470001]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     Camera3DComponent:
       IsActive: true
+  - Entity: 42312412
+    TagComponent:
+      Tag: XBot
+    TransformComponent:
+      Position: [21.1000004, 0, -20]
+      Rotation: [0, 0, 0.00131924055]
+      Scale: [0.200000003, 0.200000003, 0.200000003]
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
+    RigidBody2DComponent:
+      BodyType: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Scale: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+  - Entity: 42312412
+    TagComponent:
+      Tag: XBot1
+    TransformComponent:
+      Position: [-19.3999996, 0, -20]
+      Rotation: [0, 0, 0.00131924055]
+      Scale: [0.200000003, 0.200000003, 0.200000003]
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
+    RigidBody2DComponent:
+      BodyType: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Scale: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5
+  - Entity: 42312412
+    TagComponent:
+      Tag: XBot1
+    TransformComponent:
+      Position: [0, 0, -5]
+      Rotation: [0, 0, 0.00131924055]
+      Scale: [0.200000003, 0.200000003, 0.200000003]
+    SkinnedMeshRendererComponent:
+      Path: assets/models/XBot/Thriller2.fbx
+    RigidBody2DComponent:
+      BodyType: 0
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Scale: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.5
+      RestitutionThreshold: 0.5

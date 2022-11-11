@@ -13,45 +13,8 @@
 #include "Renderer/Texture.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/Shader.h"
-#include "Core/TimeStep.h"
 
 namespace SGE {
-    static const uint32_t MAX_NUM_BONES_PER_VERTEX = 4;
-
-    struct BoneInfo
-    {
-        BoneInfo(const glm::mat4& offset)
-        {
-            OffsetMatrix = offset;
-            FinalTransformationMatrix = glm::mat4(0.0f);
-        }
-
-        glm::mat4 OffsetMatrix{ 1.0f };                 // local to bone space
-        glm::mat4 FinalTransformationMatrix{ 1.0f };    // local space matrix after animation
-    };
-
-    struct VertexBoneData 
-    {
-        VertexBoneData() {}
-
-        void AddBoneData(int boneID, float weight)
-        {
-            for(int i = 0; i < MAX_NUM_BONES_PER_VERTEX; i++)
-            {
-                if(Weights[i] == 0.0f) 
-                {
-                    BoneIDS[i] = boneID;
-                    Weights[i] = weight;
-                    return;
-                }
-            }
-            assert(0);  // Should Never Reach More than Alloted Space for Bones
-        }
-
-        int BoneIDS[MAX_NUM_BONES_PER_VERTEX] = {};
-        float Weights[MAX_NUM_BONES_PER_VERTEX] = {};
-    };
-
     class Model
     {
     private:
@@ -61,9 +24,8 @@ namespace SGE {
             INDEX_BUFFER = 1,
             TEXCOORD_VB = 2,
             NORMAL_VB = 3,
-            BONE_VB = 4,
 
-            NUM_BUFFERS = 5
+            NUM_BUFFERS = 4
         };
     public:
         Model(const std::string& modelPath, bool flipUVS = false);
@@ -89,23 +51,6 @@ namespace SGE {
         void ProcessMesh(const aiMesh* pMesh);
 	    void ProcessNodeHierarchy(const aiNode* pNode, const glm::mat4& parentTransform, float timeInTicks);
 
-        // - Animation
-        void ProcessMeshBones(uint32_t meshIndex, const aiMesh* pMesh);
-        void ProcessSingleBone(uint32_t meshIndex, aiBone* pBone);
-        int GetBoneID(const aiBone* pBone);
-        void GetBoneTransforms(std::vector<glm::mat4>& Transforms, float animationTime);
-        const aiNodeAnim* GetNodeAnim(const aiAnimation* pAnimation, const std::string& nodeName);
-
-        void InterpolateScale(glm::vec3& scale, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-        uint32_t FindScaling(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-        void InterpolateRotation(aiQuaternion& rotation, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-        uint32_t FindRotation(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-        void InterpolateTranslation(glm::vec3& translation, float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-        uint32_t FindTranslation(float animationTimeTicks, const aiNodeAnim* pNodeAnim);
-
-        // - Helper
-        const glm::mat4 AssimpToGlmMatrix(const aiMatrix4x4& matrix);
-
         // - Buffers
         void PopulateBuffers();
     private:
@@ -116,13 +61,6 @@ namespace SGE {
         // Model Structures
         std::vector<Mesh> m_Meshes{};
         std::vector<Ref<Material>>  m_Materials{};
-
-        // Bone Structures
-        std::vector<glm::mat4> m_BoneTransforms{};
-        std::vector<VertexBoneData> m_Bones{};
-        std::vector<BoneInfo> m_BoneInfos{};
-        std::map<std::string, uint32_t> m_BoneNamesToIndex{};
-        glm::mat4 m_GlobalInverseTransform{ 1.0f };
 
         // Local Model Vertex Buffers (each mesh)
         std::vector<glm::vec3> m_Positions{};

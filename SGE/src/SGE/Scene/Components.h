@@ -6,6 +6,7 @@
 
 #include "Core/Core.h"
 #include "Renderer/Model.h"
+#include "Renderer/SkinnedMeshRenderer/AnimatedModel.h"
 #include "Renderer/Camera.h"
 #include "Scene/ScriptableEntity.h"
 #include "Events/Event.h"
@@ -23,6 +24,13 @@ namespace SGE {
       Ref<Model> Model;
       MeshRendererComponent(Ref<SGE::Model> model)
       :Model(model){}
+   };
+
+   struct SkinnedMeshRendererComponent
+   {
+      Ref<AnimatedModel> AnimatedModel;
+      SkinnedMeshRendererComponent(Ref<SGE::AnimatedModel> model)
+      :AnimatedModel(model){}
    };
 
    struct PointLightComponent

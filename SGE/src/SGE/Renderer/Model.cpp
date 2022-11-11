@@ -3,12 +3,8 @@
 #include <glad/glad.h>
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "glm/gtc/quaternion.hpp"
 
 #include "Renderer/ResourceManager.h"
-
-// TODO: REMOVE
-#include <GLFW/glfw3.h>
 
 static const int POSITION_LOCATION = 0;
 static const int NORMAL_LOCATION = 1;
@@ -29,13 +25,14 @@ namespace SGE {
 		for(uint32_t i = 0; i< m_Buffers.size(); i++)
 			glGenBuffers(1, &m_Buffers[i]);
 
-		printf("Model::LOADING %s...\n", modelPath.c_str());
+		printf("MODEL::LOADING %s ==> ", modelPath.c_str());
 		LoadModel(modelPath, flipUVS);
-		printf("Model::SUCCESS %s\n", modelPath.c_str());
+		printf("SUCCESS\n");
 	}
 
 	Model::~Model()
 	{
+		//delete m_aiScene; TODO: Clean Scene
 		for(auto buffer : m_Buffers)
 			glDeleteBuffers(1, &buffer);
 		
@@ -75,7 +72,6 @@ namespace SGE {
 			return;
 		}
 
-		m_GlobalInverseTransform = AssimpToGlmMatrix(m_aiScene->mRootNode->mTransformation.Inverse());
 		success = ProcessScene(m_aiScene, fileName);
 		success = ProcessMaterials(m_aiScene, fileName);
 
@@ -90,19 +86,8 @@ namespace SGE {
 		glBindVertexArray(0);
 	}
 	
-	static float startTime = (float)glfwGetTime();
 	void Model::Render(const Ref<Shader> shader)
 	{
-		// Process Animation Transforms
-		float animationTime = ((float)glfwGetTime() - startTime); // in seconds
-
-		// Check if Model Has Animation Transforms
-		if (m_aiScene->HasAnimations())
-		{
-			GetBoneTransforms(m_BoneTransforms, animationTime);
-			shader->SetMat4Array("u_Bones", m_BoneTransforms);
-		}
-
 		glBindVertexArray(m_RendererID);
 		for(uint32_t i = 0; i < m_Meshes.size(); i++)
 		{
@@ -162,7 +147,6 @@ namespace SGE {
 
 		uint32_t nVertices = 0;
 		uint32_t nIndices = 0;
-		uint32_t nTotalBones = 0;
 
 		// Assign Mesh Properties & Allocate Space for Buffers
 		for(uint32_t i = 0; i < m_Meshes.size(); i++)
@@ -175,12 +159,7 @@ namespace SGE {
 
 			nVertices += scene->mMeshes[i]->mNumVertices;
 			nIndices  += m_Meshes[i].m_NumIndices;
-			nTotalBones += m_Meshes[i].m_NumBones;
 		}
-
-		// Resize Bones Mapping to Fit EFfected Vertices
-		m_Bones.resize(nVertices);
-
 		// Reserve local Buffers to Fit All Mesh Vertex Data
 		m_Positions.reserve(nVertices);
 		m_Normals.reserve(nVertices);
@@ -192,9 +171,6 @@ namespace SGE {
 		{
 			const aiMesh* aiMesh = scene->mMeshes[i];
 			ProcessMesh(aiMesh);
-
-			if (scene->mMeshes[i]->HasBones())
-				ProcessMeshBones(i, scene->mMeshes[i]);
 		}
 
 		// Populate GPU Buffers with Local Buffer Data
@@ -305,268 +281,10 @@ namespace SGE {
 			m_Indices.push_back(face.mIndices[2]);
 		}
 	}
-	
-	void Model::ProcessNodeHierarchy(const aiNode* pNode, const glm::mat4& parentTransform, float timeInTicks)
-	{
-		std::string nodeName(pNode->mName.data);
 
-		// Get Desired Animation
-		const aiAnimation* pAnimation = m_aiScene->mAnimations[0];
-
-		// NodeTransformationMatrix Converts from Child to Parent Coordinate Systems
-		glm::mat4 nodeTransformationMatrix = AssimpToGlmMatrix(pNode->mTransformation);
-
-		// Get Ai Node Anim
-		const aiNodeAnim* pNodeAnim = GetNodeAnim(pAnimation, nodeName);
-
-		// Replace Transformation Matrix of Animation if pNodeAnim was Found
-		if(pNodeAnim) 
-		{
-			glm::vec3 scale;
-			InterpolateScale(scale, timeInTicks, pNodeAnim);
-			glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
-
-			aiQuaternion rotationQ;
-			InterpolateRotation(rotationQ, timeInTicks, pNodeAnim);
-			glm::mat4 rotationMatrix = glm::mat4_cast(glm::quat(rotationQ.w, rotationQ.x, rotationQ.y, rotationQ.z));
-
-			glm::vec3 translation;
-			InterpolateTranslation(translation, timeInTicks, pNodeAnim);
-			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), translation);
-
-			nodeTransformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-		}
-
-		// Assign Intermediate Transform Matrix from 
-		glm::mat4 globalTransformation = parentTransform * nodeTransformationMatrix;
-		if(m_BoneNamesToIndex.find(nodeName) != m_BoneNamesToIndex.end())
-		{
-			uint32_t boneIndex = m_BoneNamesToIndex[nodeName];
-			m_BoneInfos[boneIndex].FinalTransformationMatrix = m_GlobalInverseTransform * globalTransformation * m_BoneInfos[boneIndex].OffsetMatrix;
-		}
-
-		for(uint32_t i = 0; i < pNode->mNumChildren; i++)
-			ProcessNodeHierarchy(pNode->mChildren[i], globalTransformation, timeInTicks);
-	}
-	
-	void Model::ProcessMeshBones(uint32_t meshIndex, const aiMesh* pMesh)
-	{
-		// Process Each Bone In Mesh
-		for(uint32_t i = 0; i < pMesh->mNumBones; i++)
-			ProcessSingleBone(meshIndex, pMesh->mBones[i]);
-	}
-	
-	void Model::ProcessSingleBone(uint32_t meshIndex, aiBone* pBone)
-	{
-		// BoneIDS correspond to boneInfos Index
-		uint32_t boneID = GetBoneID(pBone);
-
-		// Check If new Bone
-		if(boneID == m_BoneInfos.size())
-		{
-			// Store new offsetMatrix to boneInfo
-			BoneInfo boneInfo(AssimpToGlmMatrix(pBone->mOffsetMatrix));
-			m_BoneInfos.push_back(boneInfo);
-		}
-
-		for (uint32_t i = 0; i < pBone->mNumWeights; i++)
-		{
-			const aiVertexWeight& vw = pBone->mWeights[i];
-
-			// Generate Global VertexID (as vertex weight vertex IDs are relative to 0)
-			uint32_t globalVertexID = m_Meshes[meshIndex].BaseVertex() + vw.mVertexId; 
-			assert(globalVertexID < m_Bones.size());
-			m_Bones[globalVertexID].AddBoneData(boneID, vw.mWeight);
-		}
-	}
-	
-	int Model::GetBoneID(const aiBone* pBone)
-	{
-		int boneID = 0;
-		std::string boneName = pBone->mName.C_Str();
-
-		if(m_BoneNamesToIndex.find(boneName) == m_BoneNamesToIndex.end())
-		{
-			// Assign Bone Name to an ID
-			boneID = (int)m_BoneNamesToIndex.size();
-			m_BoneNamesToIndex[boneName] = boneID;
-		}
-		else 
-		{
-			boneID = m_BoneNamesToIndex[boneName];
-		}
-
-		return boneID;
-	}
-	
-    void Model::GetBoneTransforms(std::vector<glm::mat4>& Transforms, float animationTime)
-	{
-		// Resize to How Many Bones/BoneInfos is Present in Model
-		Transforms.resize(m_BoneInfos.size());
-
-		float ticksPerSecond = static_cast<float>(m_aiScene->mAnimations[0]->mTicksPerSecond) != 0.0f ? m_aiScene->mAnimations[0]->mTicksPerSecond : 25.0f;
-		float timeInTicks = animationTime * ticksPerSecond;
-		float animationTimeTicks = fmod(timeInTicks, (float)m_aiScene->mAnimations[0]->mDuration);
-
-		// Process Hierarchy to get Final Transformation
-		glm::mat4 identity(1.0f);
-		ProcessNodeHierarchy(m_aiScene->mRootNode, identity, animationTimeTicks);
-
-		// Store All Final Transformations in Passed Transform Vector
-		for (uint32_t i = 0; i < m_BoneInfos.size(); i++)
-		{
-			Transforms[i] = m_BoneInfos[i].FinalTransformationMatrix; 
-		}
-	}
-	
-    const aiNodeAnim* Model::GetNodeAnim(const aiAnimation* pAnimation, const std::string& nodeName)
-	{
-		for(uint32_t i = 0; i < pAnimation->mNumChannels; i++)
-		{
-			const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
-			if (std::string(pNodeAnim->mNodeName.data) == nodeName)
-				return pNodeAnim;
-		}
-
-		return nullptr;
-	}
-	
-	void Model::InterpolateScale(glm::vec3& scale, float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		// You need atleast two values to interpolate
-		if(pNodeAnim->mNumScalingKeys < 2 || true) {
-			aiVector3D scaleKeys = pNodeAnim->mScalingKeys[0].mValue;
-			scale = glm::vec3{scaleKeys.x, scaleKeys.y, scaleKeys.z};
-			return;
-		}
-
-		uint32_t scaleIndex = FindScaling(animationTimeTicks, pNodeAnim);
-		uint32_t nextScaleIndex = scaleIndex + 1;
-
-		assert(nextScaleIndex < pNodeAnim->mNumScalingKeys);
-
-		float t1 = (float)pNodeAnim->mScalingKeys[scaleIndex].mTime;
-		float t2 = (float)pNodeAnim->mScalingKeys[nextScaleIndex].mTime;
-		float dt = t2 - t1;
-		float factor = (animationTimeTicks - t1) / dt;
-
-		if (!(factor >= 0.0f && factor <= 1.0f))
-			__debugbreak();
-
-		const aiVector3D& start = pNodeAnim->mScalingKeys[scaleIndex].mValue;
-		const aiVector3D& end = pNodeAnim->mScalingKeys[nextScaleIndex].mValue;
-		aiVector3D delta = end - start;
-		scale = glm::vec3{start.x, start.y, start.z} + (factor * glm::vec3{delta.x, delta.y, delta.z});
-	}
-	
-	uint32_t Model::FindScaling(float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		assert(pNodeAnim->mNumScalingKeys > 0);
-
-		for(uint32_t i = 0; i < pNodeAnim->mNumScalingKeys -1 ; i++)
-		{
-			float t = (float)pNodeAnim->mScalingKeys[i + 1].mTime;
-
-			if (animationTimeTicks < t)
-				return i;
-		}
-		return 0;
-	}
-	
-	void Model::InterpolateRotation(aiQuaternion& rotation, float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		// You need atleast two values to interpolate
-		if(pNodeAnim->mNumRotationKeys < 2) {
-			rotation = pNodeAnim->mRotationKeys[0].mValue;
-			return;
-		}
-
-		uint32_t rotationIndex = FindRotation(animationTimeTicks, pNodeAnim);
-		uint32_t nextRotationIndex =  rotationIndex+ 1;
-
-		assert(nextRotationIndex < pNodeAnim->mNumRotationKeys);
-
-		float t1 = (float)pNodeAnim->mRotationKeys[rotationIndex].mTime;
-		float t2 = (float)pNodeAnim->mRotationKeys[nextRotationIndex].mTime;
-		float dt = t2 - t1;
-		float factor = (animationTimeTicks - t1) / dt;
-
-		assert(factor >= 0.0f && factor <= 1.0f);
-		const aiQuaternion& start = pNodeAnim->mRotationKeys[rotationIndex].mValue;
-		const aiQuaternion& end = pNodeAnim->mRotationKeys[nextRotationIndex].mValue;
-		aiQuaternion::Interpolate(rotation, start, end, factor);
-		rotation.Normalize();
-	}
-	
-	uint32_t Model::FindRotation(float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		assert(pNodeAnim->mNumRotationKeys > 0);
-
-		for(uint32_t i = 0; i < pNodeAnim->mNumRotationKeys - 1 ; i++)
-		{
-			float t = (float)pNodeAnim->mRotationKeys[i + 1].mTime;
-
-			if (animationTimeTicks < t)
-				return i;
-		}
-
-		return 0;
-	}
-	
-	void Model::InterpolateTranslation(glm::vec3& translation, float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		// You need atleast two values to interpolate
-		if(pNodeAnim->mNumPositionKeys < 2) {
-			aiVector3D translationKeys = pNodeAnim->mPositionKeys[0].mValue;
-			translation = glm::vec3{translationKeys.x, translationKeys.y, translationKeys.z};
-			return;
-		}
-
-		uint32_t translationIndex = FindTranslation(animationTimeTicks, pNodeAnim);
-		uint32_t nextTranslationIndex = translationIndex + 1;
-
-		assert(nextTranslationIndex < pNodeAnim->mNumPositionKeys);
-
-		float t1 = (float)pNodeAnim->mPositionKeys[translationIndex].mTime;
-		float t2 = (float)pNodeAnim->mPositionKeys[nextTranslationIndex].mTime;
-		float dt = t2 - t1;
-		float factor = (animationTimeTicks - t1) / dt;
-
-		assert(factor >= 0.0f && factor <= 1.0f);
-		const aiVector3D& start = pNodeAnim->mPositionKeys[translationIndex].mValue;
-		const aiVector3D& end = pNodeAnim->mPositionKeys[nextTranslationIndex].mValue;
-		aiVector3D delta = end - start;
-		translation = glm::vec3{start.x, start.y, start.z} + (factor * glm::vec3{delta.x, delta.y, delta.z});
-	}
-	
-	uint32_t Model::FindTranslation(float animationTimeTicks, const aiNodeAnim* pNodeAnim)
-	{
-		assert(pNodeAnim->mNumPositionKeys > 0);
-
-		for(uint32_t i = 0; i < pNodeAnim->mNumPositionKeys - 1 ; i++)
-		{
-			float t = (float)pNodeAnim->mPositionKeys[i + 1].mTime;
-
-			if (animationTimeTicks < t)
-				return i;
-		}
-		return 0;
-	}
-	
-	const glm::mat4 Model::AssimpToGlmMatrix(const aiMatrix4x4& matrix)
-	{
-		glm::mat4 mat(0.0f);
-		for(int y = 0; y < 4; y++)
-		{
-			for(int x = 0; x < 4; x++)
-				mat[x][y] = matrix[y][x];
-		}
-		return mat;
-	}
-	
 	void Model::PopulateBuffers()
 	{
-		// Fill Vertex Buffers
+		// Fill Mesh Vertex Buffers
 		glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POSITION_VB]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(m_Positions[0]) * m_Positions.size(), m_Positions.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(POSITION_LOCATION);
@@ -581,14 +299,6 @@ namespace SGE {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(m_TexCoords[0]) * m_TexCoords.size(), m_TexCoords.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(TEX_COORD_LOCATION);
 		glVertexAttribPointer(TEX_COORD_LOCATION, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-		// Animation/Skinned Mesh Buffers
-		glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[BONE_VB]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(m_Bones[0]) * m_Bones.size(), m_Bones.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(BONE_ID_LOCATION);
-		glVertexAttribIPointer(BONE_ID_LOCATION, MAX_NUM_BONES_PER_VERTEX, GL_INT, sizeof(VertexBoneData), (void*)0);
-		glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
-		glVertexAttribPointer(BONE_WEIGHT_LOCATION, MAX_NUM_BONES_PER_VERTEX, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*)(MAX_NUM_BONES_PER_VERTEX * sizeof(int32_t)));
 
 		// Index Buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);

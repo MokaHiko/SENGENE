@@ -16,8 +16,8 @@ namespace SGE{
 
 		m_RendererID = CreateProgram(vertexShader, fragmentShader);
 
-		printf("Shader::Vertex %s Loaded\n", vertexPath.c_str());
-		printf("Shader::Fragment %s Loaded\n",fragmentPath.c_str());
+		printf("Shader::Vertex %s ==> SUCCESS\n", vertexPath.c_str());
+		printf("Shader::Fragment %s ==> SSUCCESS\n",fragmentPath.c_str());
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
@@ -31,6 +31,11 @@ namespace SGE{
 	Ref<Shader> Shader::CreateShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
 		return ResourceManager::CreateShader(vertexPath, fragmentPath);
+	}
+	
+	Ref<Shader> Shader::GetShader(const std::string& shaderName)
+	{
+		return ResourceManager::GetShader(shaderName);
 	}
 	
 	void Shader::Bind() const
@@ -65,7 +70,14 @@ namespace SGE{
 
 	void Shader::SetMat4Array(const std::string& name, const std::vector<glm::mat4>& value) const
 	{
-		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, name.c_str()), static_cast<int32_t>(value.size()), GL_FALSE, glm::value_ptr(value[0]));
+		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, name.c_str()), value.size(), GL_FALSE, glm::value_ptr(value[0]));
+	}
+
+	void Shader::SetMat4Array(const std::string& name, const glm::mat4& value, uint32_t index) const
+	{
+		std::stringstream ss;
+		ss << name << "[" << index << "]";
+		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, ss.str().c_str() ), 1, GL_FALSE, glm::value_ptr(value[0]));
 	}
 
 	void Shader::SetVec3(const std::string& name, const glm::vec3& value) const

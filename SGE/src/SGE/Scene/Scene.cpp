@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "Renderer/Renderer.h"
+#include "SkinnedMeshRenderer/SkinnedMeshRenderer.h"
 #include "Systems.h"
 
 #include "Core/TimeStep.h"
@@ -157,13 +158,28 @@ namespace SGE {
 		}
 
 		{
-			auto group = m_Registry.group<MeshRendererComponent, TransformComponent>();
-
-			for(auto entity : group)
+			// Draw Meshes
 			{
-				auto& model = group.get<MeshRendererComponent>(entity);
-				auto& transform = group.get<TransformComponent>(entity);
-				Renderer::Draw(model.Model, transform.Position, transform.Rotation, transform.Scale);
+				auto group = m_Registry.group<MeshRendererComponent, TransformComponent>();
+
+				for(auto entity : group)
+				{
+					auto& model = group.get<MeshRendererComponent>(entity);
+					auto& transform = group.get<TransformComponent>(entity);
+					Renderer::Draw(model.Model, transform.Position, transform.Rotation, transform.Scale);
+				}
+			}
+
+			// Draw Animated Meshes
+			{
+				auto group = m_Registry.group<SkinnedMeshRendererComponent>(entt::get<TransformComponent>);
+
+				for(auto entity : group)
+				{
+					auto& model = group.get<SkinnedMeshRendererComponent>(entity);
+					auto& transform = group.get<TransformComponent>(entity);
+					SkinnedMeshRenderer::Draw(model.AnimatedModel, transform.Position, transform.Rotation, transform.Scale);
+				}
 			}
 		}
 	}

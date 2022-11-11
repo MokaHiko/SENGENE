@@ -138,6 +138,13 @@ namespace SGE {
 					deserializedEntity.AddComponent<MeshRendererComponent>(Model::CreateModel(path));
 				}
 
+				auto skinnedMeshRendererComponent = entity["SkinnedMeshRendererComponent"];
+				if(skinnedMeshRendererComponent)
+				{
+					std::string path = skinnedMeshRendererComponent["Path"].as<std::string>();
+					deserializedEntity.AddComponent<SkinnedMeshRendererComponent>(AnimatedModel::CreateAnimatedModel(path));
+				}
+
 				auto rigidBody2DComponent = entity["RigidBody2DComponent"];
 				if(rigidBody2DComponent)
 				{
@@ -228,6 +235,24 @@ namespace SGE {
 			for(auto it = ResourceManager::m_Models.begin(); it != ResourceManager::m_Models.end();)
 			{
 				if(it->second == model.Model)
+				{
+					out << YAML::Key << "Path" << YAML::Value << it->first;
+				}
+				it++;
+			}
+
+			out << YAML::EndMap;
+		}
+
+		if(entity.HasComponent<SkinnedMeshRendererComponent>())
+		{
+			out << YAML::Key << "SkinnedMeshRendererComponent";
+			out << YAML::BeginMap;
+
+			auto& model = entity.GetComponent<SkinnedMeshRendererComponent>();
+			for(auto it = ResourceManager::m_AnimatedModels.begin(); it != ResourceManager::m_AnimatedModels.end();)
+			{
+				if(it->second == model.AnimatedModel)
 				{
 					out << YAML::Key << "Path" << YAML::Value << it->first;
 				}

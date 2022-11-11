@@ -11,18 +11,32 @@
 
 #include "Utils/PlatformUtils.h"
 
+#include <SkinnedMeshRenderer/SkinnedMeshRenderer.h>
 Sandbox2D::~Sandbox2D()
 {
 }
 
 void Sandbox2D::OnAttach() 
 {
-	// Load Engine Resources
-	SGE::Application::Get().GetWindow().SetWindowTitle("Sandbox 2D");
-	m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/phong_instanced_shader.vert", "./assets/shaders/phong_instanced_shader.frag");
-	//m_SceneData.SceneShader = SGE::Shader::CreateShader("./assets/shaders/gizmo_instanced_shader.vert", "./assets/shaders/gizmo_instanced_shader.frag");
+	// Configure App Settings
+	{
+		SGE::Application::Get().GetWindow().SetWindowTitle("Sandbox 2D");
+	}
 
-	LoadScene("assets/scenes/example.selfish");
+	// Load Engine Resources
+	{
+		// Load Default Shaders
+		SGE::Shader::CreateShader("assets/shaders/phong_instanced_shader.vert", "assets/shaders/phong_instanced_shader.frag");
+		SGE::Shader::CreateShader("assets/shaders/phong_instanced_shader_animated.vert", "assets/shaders/phong_instanced_shader_animated.frag");
+
+		// Init Renderers
+		SGE::Renderer::Init();
+		SGE::SkinnedMeshRenderer::Init();
+
+		// Load Basic Shapes
+		SGE::Model::CreateModel("assets/models/cube/cube.obj");
+		LoadScene("assets/scenes/example.selfish");
+	}
 }
 
 void Sandbox2D::OnDetach()
@@ -51,13 +65,26 @@ void Sandbox2D::OnUpdate(SGE::TimeStep ts)
 {
 	// Render Setup
 	m_Framebuffer->Bind();
-	SGE::Renderer::Begin();
 
 	// Update Scene ECS 	
 	m_Scene->Update(ts);
 
-	// Actual Rendering
+	// Renderering
+
+	// Common Render Commands
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// TODO: Give Renderes Special Cameras
+	SGE::Renderer::Begin();
 	SGE::Renderer::End();
+
+	SGE::SkinnedMeshRenderer::Begin();
+	SGE::SkinnedMeshRenderer::End();
+
+	// Update if Debug/Widget Data
+	m_FrameTime = ts.GetMilliSeconds();
+
 	m_Framebuffer->Unbind();
 }
 
@@ -187,12 +214,9 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::End();
 
 	ImGui::Begin("Gizmos Control");
-	std::string boneIndex = "Change Focused Bone: " +  std::to_string(m_SceneData.FocusedBoneIndex);
-	if(ImGui::Button(boneIndex.c_str()))
-	{
-		m_SceneData.FocusedBoneIndex += 1;
-		SGE::Renderer::Configure(m_SceneData);
-	}
+	ImGui::Text("FPS: %0.2f fps", 1.0f/m_FrameTime * 1000.0);
+	ImGui::Text("FrameTime: %0.2f ms", m_FrameTime);
+
 	ImGui::End();
 }
 
@@ -248,6 +272,7 @@ void Sandbox2D::ResetScene()
 	}
 
 	SGE::Renderer::Configure(m_SceneData);
+	SGE::SkinnedMeshRenderer::Configure(m_SceneData);
 }
 
 bool Sandbox2D::OnWindowResize(SGE::WindowResizeEvent& event)

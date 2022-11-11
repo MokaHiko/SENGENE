@@ -20,6 +20,7 @@ namespace SGE{
         ~Shader();
 
         static Ref<Shader> CreateShader(const std::string& vertexPath, const std::string& fragmentPath);
+        static Ref<Shader> GetShader(const std::string& shaderName);
 
         void Bind() const;
         void Unbind() const;
@@ -30,6 +31,7 @@ namespace SGE{
         void SetFloat(const std::string& name, float value);
         void SetMat4(const std::string& name, const glm::mat4& value) const;
         void SetMat4Array(const std::string& name, const std::vector<glm::mat4>& value) const;
+        void SetMat4Array(const std::string& name, const glm::mat4& value, uint32_t index = 0) const;
 	    void SetVec3(const std::string& name, const glm::vec3& value) const;
     private:
         uint32_t CompileShaders(const char* shaderCode, ShaderType type);

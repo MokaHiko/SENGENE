@@ -20,7 +20,6 @@ namespace SGE{
 		m_Window = std::unique_ptr<Window>(Window::CreateWindow());
 		m_Window->SetEventCallBack(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
-		Renderer::Init();
 		m_LastFrameTime = (float)glfwGetTime();
 
 		m_ImGuiLayer = new ImGuiLayer();

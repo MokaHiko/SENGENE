@@ -5,6 +5,7 @@
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Model.h"
+#include "Renderer/SkinnedMeshRenderer/AnimatedModel.h"
 
 namespace SGE {
     class ResourceManager
@@ -22,11 +23,15 @@ namespace SGE {
 
 	    static Ref<Model> CreateModel(const std::string& modelPath, bool flipUVS);
 	    static Ref<Model> GetModel(const std::string& name);
+
+	    static Ref<AnimatedModel> CreateAnimatedModel(const std::string& modelPath, bool flipUVS);
+	    static Ref<AnimatedModel> GetAnimatedModel(const std::string& name);
     private:
         static std::unordered_map<std::string, Ref<Shader>> m_Shaders;
         static std::unordered_map<std::string, Ref<Texture2D>> m_Textures;
         static std::unordered_map<std::string, Ref<Material>> m_Materials;
         static std::unordered_map<std::string, Ref<Model>> m_Models;
+        static std::unordered_map<std::string, Ref<AnimatedModel>> m_AnimatedModels;
 
         friend class SceneSerializer;
     };

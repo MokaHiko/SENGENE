@@ -27,6 +27,7 @@ namespace SGE{
 		bool m_test_drag_and_drop = false;
 
         void ScenePopupWindows();
+        void EntityPopupWindows();
     private:
         Entity m_SelectedEntity;
         Ref<Scene> m_SceneContext; // TODO: SOME SORT OF WEAK PTR
