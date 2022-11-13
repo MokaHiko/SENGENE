@@ -6,6 +6,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 project(SENGINE2D) 
 
-# Link To Hazel
+# Link To SENGINE
 add_subdirectory(./SGE) 
 add_subdirectory(./Sandbox2D) 
