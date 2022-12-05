@@ -35,6 +35,14 @@ namespace SGE {
 		return m_Textures[texturePath];
 	}
 	
+	Ref<Texture2D> ResourceManager::CreateTexture(const std::string& textureName, void* buffer, uint32_t bufferSize)
+	{
+		if(m_Textures.find(textureName) == m_Textures.end())
+			m_Textures[textureName] = CreateRef<Texture2D>(buffer, bufferSize);
+
+		return m_Textures[textureName];
+	}
+	
 	Ref<Texture2D> ResourceManager::GetTexture(const std::string& textureName)
 	{
 		if(m_Textures.find(textureName) != m_Textures.end())

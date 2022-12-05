@@ -1,9 +1,10 @@
 #include "AnimatedModel.h"
 
 #include <glad/glad.h>
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include "Renderer/ResourceManager.h"
 
@@ -54,7 +55,7 @@ namespace SGE {
 	{
 		// TODO: ROTATE AROUND ANY AXIS
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
-		model = glm::rotate(model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
+		model *= glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
 		model = glm::scale(model, scale);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_AnimatedModelTransformMatrixBuffer);
@@ -230,12 +231,19 @@ namespace SGE {
 
 					if(texturePath.substr(0, 2) == ".\\")
 						texturePath = texturePath.substr(2, texturePath.size() - 2);
-					
 					std::string fullPath = dir + "/" + texturePath;
-					m_Materials[i]->DiffuseTexture = Texture2D::CreateTexture2D(fullPath);
 
-					if (!m_Materials[i]->DiffuseTexture)
+					// Check if Texture is Embedded
+					const aiTexture* pAiEmbeddedTexture = m_aiScene->GetEmbeddedTexture(pathBuffer.C_Str());
+					if(pAiEmbeddedTexture) {
+						m_Materials[i]->DiffuseTexture = Texture2D::CreateTexture2D(fullPath, pAiEmbeddedTexture->pcData, pAiEmbeddedTexture->mWidth);
+					} else {
+						m_Materials[i]->DiffuseTexture = Texture2D::CreateTexture2D(fullPath);
+					}
+
+					if (!m_Materials[i]->DiffuseTexture) {
 						success = false;
+					}
 				}
 			}
 
@@ -248,9 +256,15 @@ namespace SGE {
 
 					if(texturePath.substr(0, 2) == ".\\")
 						texturePath = texturePath.substr(2, texturePath.size() - 2);
-					
 					std::string fullPath = dir + "/" + texturePath;
-					m_Materials[i]->SpecularTexture = Texture2D::CreateTexture2D(fullPath);
+
+					const aiTexture* pAiEmbeddedTexture = m_aiScene->GetEmbeddedTexture(pathBuffer.C_Str());
+
+					if (pAiEmbeddedTexture) {
+						m_Materials[i]->SpecularTexture = Texture2D::CreateTexture2D(fullPath, pAiEmbeddedTexture->pcData, pAiEmbeddedTexture->mWidth);
+					} else {
+						m_Materials[i]->SpecularTexture = Texture2D::CreateTexture2D(fullPath);
+					}
 
 					if (!m_Materials[i]->SpecularTexture)
 						success = false;
@@ -414,9 +428,24 @@ namespace SGE {
 		// Resize to How Many Bones/BoneInfos is Present in AnimatedModel
 		Transforms.resize(m_BoneInfos.size());
 
+		// Store Root Bone Transform
+		assert(m_BoneInfos.size() > 0);
+		m_RootBoneTransform = m_BoneInfos[0].FinalTransformationMatrix;
+
 		// Store All Final Transformations in Passed Transform Vector
-		for (uint32_t i = 0; i < m_BoneInfos.size(); i++)
-			Transforms[i] = m_BoneInfos[i].FinalTransformationMatrix; 
+		if(!m_AnimatedInPlace)
+		{
+			for (uint32_t i = 0; i < m_BoneInfos.size(); i++) {
+				Transforms[i] = m_BoneInfos[i].FinalTransformationMatrix; 
+			}
+		}
+		else
+		{
+			glm::mat4 inPlaceTransform = glm::inverse(m_RootBoneTransform);
+			for (uint32_t i = 0; i < m_BoneInfos.size(); i++) {
+				Transforms[i] =  inPlaceTransform * m_BoneInfos[i].FinalTransformationMatrix; 
+			}
+		}
 	}
 	
     const aiNodeAnim* AnimatedModel::GetNodeAnim(const aiAnimation* pAnimation, const std::string& nodeName)

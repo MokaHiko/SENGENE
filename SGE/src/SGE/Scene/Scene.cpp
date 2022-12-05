@@ -4,80 +4,39 @@
 #include "Systems.h"
 
 #include "Core/TimeStep.h"
-
-#include <box2d/b2_world.h>
-#include <box2d/b2_body.h>
-#include <box2d/b2_polygon_shape.h>
-#include <box2d/b2_fixture.h>
 namespace SGE {
 	Scene::Scene(const std::string& sceneName)
-		:m_Name(sceneName) {}
+		:m_Name(sceneName) 
+	{
+	}
 
 	Scene::~Scene()
 	{
-		delete m_PhysicsWorld;
+		flg::PhysicsWorld::Clear();
 	}
 
-	b2BodyType SGERigidbody2DTypeToBox2D(RigidBody2DComponent::BodyType type)
-	{
-		switch (type)
-		{
-		case RigidBody2DComponent::BodyType::Static:
-			return b2BodyType::b2_staticBody;
-		case RigidBody2DComponent::BodyType::Dynamic:
-			return b2BodyType::b2_dynamicBody;
-		case RigidBody2DComponent::BodyType::Kinematic:
-			return b2BodyType::b2_kinematicBody;
-		}
-
-		printf("Uknown RigidBody Type: ");
-		return b2BodyType::b2_staticBody; 
-	}
 	void Scene::OnScenePlay()
 	{
-		m_PhysicsWorld = new b2World({0.0f, -20.f} );
-
-		auto view = m_Registry.view<RigidBody2DComponent>();
-		for (auto e : view)
+		// Rebuild Physics World
+		auto group = m_Registry.group<RigidBodyComponent>(entt::get<TransformComponent>);
+		for (auto e : group)
 		{
-			auto& entity = Entity{ e, this };
-			TransformComponent& transform = entity.GetComponent<TransformComponent>();
-			RigidBody2DComponent& rigidBody2D = entity.GetComponent<RigidBody2DComponent>();
+			Entity entity = {e, this};
 
-			b2BodyDef def{};
-			def.type = SGERigidbody2DTypeToBox2D(rigidBody2D.Type);
-			def.angle = transform.Rotation.z;
-			def.position = { transform.Position.x, transform.Position.y };
-			def.linearVelocity.Set(0.0f, 0.0f);
-			def.angularVelocity = 0.0f;
-			def.linearDamping = 0.0f;
-			def.angularDamping = 0.0f;
-			def.allowSleep = true;
-			def.awake = true;
-			def.fixedRotation = false;
-			def.bullet = false;
-			def.enabled = true;
-			def.gravityScale = 1.0f;
+			// Get Assigned Transform
+			auto& transform = entity.GetComponent<TransformComponent>();
 
-			// TODO: possibly change from void* to map
-			b2Body* body = m_PhysicsWorld->CreateBody(&def);
-			rigidBody2D.RuntimeBody = (void*)body;
+			auto& rb = entity.GetComponent<RigidBodyComponent>();
+			
+			// Assign Transform Position To Physics Body
+			rb.Body.BodyTransform.Position = transform.Position;
+			rb.Body.BodyTransform.Rotation = transform.Rotation;
 
-			// Configure Collider
-			if (entity.HasComponent<BoxCollider2DComponent>())
-			{
-				BoxCollider2DComponent& bc2d = entity.GetComponent<BoxCollider2DComponent>();
-				b2PolygonShape colliderShape;
-				colliderShape.SetAsBox(bc2d.scale.x * transform.Scale.x, bc2d.scale.y * transform.Scale.y);
+			// Configure Rb Properties
+			rb.Body.Type = flg::BodyType::Dynamic;
 
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &colliderShape;
-				fixtureDef.density = bc2d.Density;
-				fixtureDef.friction = bc2d.Friction;
-				fixtureDef.restitution = bc2d.Restitution;
-				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-				body->CreateFixture(&fixtureDef);
-			}
+			// Pass to Physics System
+			flg::PhysicsWorld::AddBody(&rb.Body);
 		}
 
 		m_SceneState = SCENE_STATE::PLAY;
@@ -85,9 +44,9 @@ namespace SGE {
 
 	void Scene::OnSceneStop()
 	{
-		delete m_PhysicsWorld;
-		m_PhysicsWorld = nullptr;
-		
+		// Clear Physics World
+		flg::PhysicsWorld::Clear();
+
 		m_SceneState = SCENE_STATE::PAUSE;
 	}
 
@@ -113,38 +72,26 @@ namespace SGE {
 						nsc.ScriptInstance->OnStart();
 					}
 					
-					// implment scripts
+					// Implement scripts
 					nsc.ScriptInstance->OnUpdate(timestep);
 				}
 			}
 
 			// Update Physics
 			{
-				const int32_t velocityIterations = 8;
-				const int32_t positionIterations = 3;
-				m_PhysicsWorld->Step(timestep, velocityIterations, positionIterations);
-
-				auto group = m_Registry.group<RigidBody2DComponent>(entt::get<TransformComponent>);
-				for (auto entity : group)
+				flg::PhysicsWorld::Step(timestep);
+				auto group = m_Registry.group<RigidBodyComponent>(entt::get<TransformComponent>);
+				for(auto entity : group)
 				{
-					auto& transform = group.get<TransformComponent>(entity);
-					auto& rigidBody2D = group.get<RigidBody2DComponent>(entity);
-
-					b2Body* body = (b2Body*)(rigidBody2D.RuntimeBody);
-					
-					// Update Properties
-					body->SetType(SGERigidbody2DTypeToBox2D(rigidBody2D.Type));
-
-					const b2Vec2& position2D = body->GetPosition();
-
-					transform.Position.x = position2D.x;
-					transform.Position.y = position2D.y;
-					transform.Rotation.z = body->GetAngle();
+					auto& transform= group.get<TransformComponent>(entity);
+					auto& rb = group.get<RigidBodyComponent>(entity);
+					transform.Position = rb.Body.GetPosition();
 				}
 			}
 		}
 		
 		{
+			// Update Camera View Matrices
 			auto group = m_Registry.group<Camera3DComponent>(entt::get<TransformComponent>);
 			for(auto entity : group)
 			{

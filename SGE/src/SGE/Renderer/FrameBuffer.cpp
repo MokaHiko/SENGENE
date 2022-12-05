@@ -33,8 +33,9 @@ namespace SGE {
 	
 	void Framebuffer::Resize(uint32_t width, uint32_t height)
 	{
-		if (width < 0 || height < 0)
+		if (width < 0 || height < 0) {
 			return;
+		}
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 		Clear();

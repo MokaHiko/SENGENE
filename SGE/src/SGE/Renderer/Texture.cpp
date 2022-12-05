@@ -18,7 +18,46 @@ namespace SGE {
 			stbi_image_free(data);
 			return;
 		}
+		ProcessImageData(data, width, height, nChannels);
+		stbi_image_free(data);
+	}
+	
+	Texture2D::Texture2D(void* buffer, uint32_t bufferSize, TextureType type)
+	{
+		int width, height, nChannels;
+		unsigned char* data = stbi_load_from_memory((const stbi_uc*)buffer, bufferSize, &width, &height, &nChannels, 0);
+		ProcessImageData(data, width, height, nChannels);
+	}
 
+	Texture2D::~Texture2D()
+	{
+		glDeleteTextures(1, &m_RendererID);
+	}
+	
+	void Texture2D::Bind(uint32_t textureUnit) const
+	{
+		glActiveTexture(GL_TEXTURE0 + m_TextureUnit);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	}
+	
+	void Texture2D::Unbind(uint32_t textureUnit) const
+	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	}
+	
+	Ref<Texture2D> Texture2D::CreateTexture2D(const std::string& path)
+	{
+		return ResourceManager::CreateTexture(path);
+	}
+
+    Ref<Texture2D> Texture2D::CreateTexture2D(const std::string& textureName, void* buffer, uint32_t bufferSize)
+	{
+		return ResourceManager::CreateTexture(textureName, buffer, bufferSize);
+	}
+	
+	void Texture2D::ProcessImageData(unsigned char* data, int width, int height, int nChannels)
+	{
 		int format = GL_RGB;
 		int internalFormat = GL_RGB8;
 		switch(nChannels)
@@ -52,29 +91,5 @@ namespace SGE {
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		stbi_image_free(data);
-	}
-
-	Texture2D::~Texture2D()
-	{
-		glDeleteTextures(1, &m_RendererID);
-	}
-	
-	void Texture2D::Bind(uint32_t textureUnit) const
-	{
-		glActiveTexture(GL_TEXTURE0 + m_TextureUnit);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-	}
-	
-	void Texture2D::Unbind(uint32_t textureUnit) const
-	{
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-	}
-	
-	Ref<Texture2D> Texture2D::CreateTexture2D(const std::string& path)
-	{
-		return ResourceManager::CreateTexture(path);
 	}
 }

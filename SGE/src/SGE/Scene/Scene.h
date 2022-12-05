@@ -5,20 +5,24 @@
 
 #include "Entity.h"
 #include "Components.h"
-#include <entt/entt.hpp>
 #include "Renderer/Shader.h"
 
-class b2World;
+#include <Physics.h>
+#include <glm/glm.hpp>
+
 namespace SGE {
     struct SceneData
     {
         SceneData() 
-            :SceneWidth(1280), SceneHeight(720), MainCamera(), DirectionalLight(), FocusedBoneIndex(0) {}
+            :SceneWidth(1280), SceneHeight(720), MainCamera(), DirectionalLight(), FocusedBoneIndex(0), ProjectionMatrix(1.0f), ViewPortBounds() {}
 
         SceneData(Entity camera, uint32_t width = 1280, uint32_t height = 720) 
-            :MainCamera(camera), DirectionalLight(), FocusedBoneIndex(0), SceneWidth(width), SceneHeight(height){}
+            :MainCamera(camera), DirectionalLight(), FocusedBoneIndex(0), SceneWidth(width), SceneHeight(height), ProjectionMatrix(1.0f), ViewPortBounds() {}
         
         // Create Sort of Weak Ptr to replace raw *
+		glm::mat4 ProjectionMatrix{};
+        glm::vec2 ViewPortBounds[2];
+
         Entity MainCamera; 
         Entity DirectionalLight;
         std::vector<Entity> PointLights;
@@ -85,8 +89,6 @@ namespace SGE {
         SCENE_STATE m_SceneState = SCENE_STATE::PAUSE;
 
         inline const std::string& GetSceneName() const {return m_Name;}
-    private:
-        b2World* m_PhysicsWorld = nullptr;
     private:
         entt::registry m_Registry;
         std::string m_Name;

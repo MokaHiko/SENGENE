@@ -9,6 +9,8 @@
 #include "Core/TimeStep.h"
 #include "Core/Input.h"
 
+#include "Physics.h"
+
 namespace SGE{
 	Application* Application::s_Instance = nullptr;
 

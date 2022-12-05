@@ -18,7 +18,6 @@ namespace SGE {
         static float Input::GetMouseY();
         
         static std::pair<float, float> Input::GetMousePosition();
-        
     };
 }
 

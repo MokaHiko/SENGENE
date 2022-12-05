@@ -135,14 +135,16 @@ namespace SGE {
 				if(meshRendererComponent)
 				{
 					std::string path = meshRendererComponent["Path"].as<std::string>();
-					deserializedEntity.AddComponent<MeshRendererComponent>(Model::CreateModel(path));
+					bool flipUVS = meshRendererComponent["FlipUVS"].as<bool>();
+					deserializedEntity.AddComponent<MeshRendererComponent>(Model::CreateModel(path), flipUVS);
 				}
 
 				auto skinnedMeshRendererComponent = entity["SkinnedMeshRendererComponent"];
 				if(skinnedMeshRendererComponent)
 				{
 					std::string path = skinnedMeshRendererComponent["Path"].as<std::string>();
-					deserializedEntity.AddComponent<SkinnedMeshRendererComponent>(AnimatedModel::CreateAnimatedModel(path));
+					bool flipUVS = skinnedMeshRendererComponent["FlipUVS"].as<bool>();
+					deserializedEntity.AddComponent<SkinnedMeshRendererComponent>(AnimatedModel::CreateAnimatedModel(path, flipUVS));
 				}
 
 				auto rigidBody2DComponent = entity["RigidBody2DComponent"];
@@ -234,13 +236,12 @@ namespace SGE {
 			auto& model = entity.GetComponent<MeshRendererComponent>();
 			for(auto it = ResourceManager::m_Models.begin(); it != ResourceManager::m_Models.end();)
 			{
-				if(it->second == model.Model)
-				{
+				if(it->second == model.Model) {
 					out << YAML::Key << "Path" << YAML::Value << it->first;
 				}
 				it++;
 			}
-
+			out << YAML::Key << "FlipUVS" << YAML::Value << model.FlipUVS;
 			out << YAML::EndMap;
 		}
 
@@ -252,13 +253,12 @@ namespace SGE {
 			auto& model = entity.GetComponent<SkinnedMeshRendererComponent>();
 			for(auto it = ResourceManager::m_AnimatedModels.begin(); it != ResourceManager::m_AnimatedModels.end();)
 			{
-				if(it->second == model.AnimatedModel)
-				{
+				if(it->second == model.AnimatedModel) {
 					out << YAML::Key << "Path" << YAML::Value << it->first;
 				}
 				it++;
 			}
-
+			out << YAML::Key << "FlipUVS" << YAML::Value << model.FlipUVS;
 			out << YAML::EndMap;
 		}
 

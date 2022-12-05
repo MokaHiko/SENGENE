@@ -82,6 +82,7 @@ namespace SGE {
         uint32_t GetNMaterials() const {return static_cast<uint32_t>(m_Materials.size());}
         uint32_t GetNMeshes() const {return static_cast<uint32_t>(m_Meshes.size());}
         uint32_t GetNBones() const {return static_cast<uint32_t>(m_Bones.size());}
+        const glm::mat4& GetRootBoneTransform() const {return m_RootBoneTransform;}
     private:
         // - AnimatedModel Loading
         void LoadAnimatedModel(const std::string& fileName, bool flipUVS);
@@ -124,6 +125,8 @@ namespace SGE {
         std::vector<BoneInfo> m_BoneInfos{};
         std::map<std::string, uint32_t> m_BoneNamesToIndex{};
         glm::mat4 m_GlobalInverseTransform{ 1.0f };
+        glm::mat4 m_RootBoneTransform{1.0f};
+        bool m_AnimatedInPlace = false;
 
         // Local AnimatedModel Vertex Buffers (each mesh)
         std::vector<glm::vec3> m_Positions{};

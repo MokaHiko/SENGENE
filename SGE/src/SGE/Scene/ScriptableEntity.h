@@ -27,6 +27,8 @@ namespace SGE {
         virtual void OnStart(){};
         virtual void OnDestroy(){};
         virtual void OnUpdate(TimeStep timestep){};
+
+        Entity GameObject() {return m_Entity;};
     private:
         Entity m_Entity{};
         friend class Scene;

@@ -20,7 +20,6 @@ add_subdirectory(vendor/entt)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/Assimp)
-add_subdirectory(vendor/box2D)
 add_subdirectory(vendor/yaml-cpp)
 
 target_include_directories(${PROJECT_NAME} 
@@ -34,7 +33,6 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC vendor/stb_image
 	PUBLIC vendor/imgui
 	PUBLIC vendor/Assimp/include
-	PUBLIC vendor/box2D/include
 	PUBLIC vendor/yaml-cpp/include
 	)
 
@@ -44,7 +42,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	glm
 	imgui
 	assimp
-	box2d
 	yaml-cpp
+	flagella
 	)
 

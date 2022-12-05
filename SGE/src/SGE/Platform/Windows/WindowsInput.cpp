@@ -1,5 +1,6 @@
 #include "Core/Input.h"
 #include <GLFW/glfw3.h>
+#include "Renderer/Renderer.h"
 
 namespace SGE  {
 	bool Input::IsKeyPressed(int keycode)
@@ -16,6 +17,7 @@ namespace SGE  {
 		return state == GLFW_PRESS;
 	}
 
+#ifdef SGE_RELEASE_MODE
 	float Input::GetMouseX()
 	{
 		auto[x,y] =	GetMousePosition();
@@ -35,4 +37,6 @@ namespace SGE  {
 		glfwGetCursorPos(window, &xpos, &ypos);
 		return {(float)xpos, (float)ypos};
 	}
+#endif
+
 }

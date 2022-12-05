@@ -15,6 +15,7 @@ namespace SGE {
 	    static Ref<Shader> GetShader(const std::string& shaderName);
 
 	    static Ref<Texture2D> CreateTexture(const std::string& texturePath);
+	    static Ref<Texture2D> CreateTexture(const std::string& textureName, void* buffer, uint32_t bufferSize);
 	    static Ref<Texture2D> GetTexture(const std::string& textureName);
 
         static Ref<Material> CreateMaterial(const std::string& name, const glm::vec3& ambientColor = glm::vec3(0.0f), const glm::vec3 diffuseColor = glm::vec3(0.0f), 

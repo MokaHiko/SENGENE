@@ -4,8 +4,9 @@ cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_GENERATOR_PLATFORM x64)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
-project(SENGINE2D) 
+project(SENGINE) 
 
 # Link To SENGINE
 add_subdirectory(./SGE) 
-add_subdirectory(./Sandbox2D) 
+add_subdirectory(./DNA) 
+add_subdirectory(./FLAG)

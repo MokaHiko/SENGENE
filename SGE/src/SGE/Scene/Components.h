@@ -10,6 +10,7 @@
 #include "Renderer/Camera.h"
 #include "Scene/ScriptableEntity.h"
 #include "Events/Event.h"
+#include "Physics.h"
 
 namespace SGE {
    struct TransformComponent
@@ -22,15 +23,17 @@ namespace SGE {
    struct MeshRendererComponent
    {
       Ref<Model> Model;
-      MeshRendererComponent(Ref<SGE::Model> model)
-      :Model(model){}
+      bool FlipUVS;
+      MeshRendererComponent(Ref<SGE::Model> model, bool flipUVS = false)
+      :Model(model), FlipUVS{flipUVS}{}
    };
 
    struct SkinnedMeshRendererComponent
    {
       Ref<AnimatedModel> AnimatedModel;
-      SkinnedMeshRendererComponent(Ref<SGE::AnimatedModel> model)
-      :AnimatedModel(model){}
+      bool FlipUVS;
+      SkinnedMeshRendererComponent(Ref<SGE::AnimatedModel> model, bool flipUVS = false)
+      :AnimatedModel(model), FlipUVS{flipUVS}{}
    };
 
    struct PointLightComponent
@@ -66,7 +69,7 @@ namespace SGE {
       Camera3D camera{};
 
       Camera3DComponent(bool isActive = true)
-         :IsActive(isActive) {}
+         :IsActive(isActive){}
    };
 
    struct NativeScriptComponent
@@ -97,6 +100,15 @@ namespace SGE {
           assert(isEvent);
           EntityCallBack = callback;
       }
+   };
+
+   struct RigidBodyComponent
+   {
+      flg::Body Body;
+      bool UseGravity = true;
+
+      RigidBodyComponent() = default;
+      RigidBodyComponent(const RigidBodyComponent& other) = default;
    };
 
    struct RigidBody2DComponent

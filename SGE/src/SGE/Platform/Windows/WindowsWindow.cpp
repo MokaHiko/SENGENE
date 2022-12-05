@@ -20,6 +20,7 @@ namespace SGE {
 			throw std::runtime_error("Failed to initialize GLFW");
 
 		glfwMakeContextCurrent(m_Window);
+		SetVSync(true);
 
 		// init glad after making WindowsWindow current context
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))

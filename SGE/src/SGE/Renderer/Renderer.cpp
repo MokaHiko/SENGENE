@@ -45,12 +45,11 @@ namespace SGE{
 	void Renderer::Begin()
 	{
 		// Bind Camera Properties
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), (float)m_SceneData.SceneWidth / (float)m_SceneData.SceneHeight, 0.1f, 1000.0f);
 		auto& camera = m_SceneData.MainCamera.GetComponent<Camera3DComponent>();
 		auto& cameraPosition = m_SceneData.MainCamera.GetComponent<TransformComponent>();
 
 		m_Shader->Bind();
-		m_Shader->SetMat4("projection", projectionMatrix);
+		m_Shader->SetMat4("projection", m_SceneData.ProjectionMatrix);
 		m_Shader->SetMat4("view", camera.camera.GetViewMatrix());
 		m_Shader->SetVec3("u_MainCameraPos", cameraPosition.Position);
 
