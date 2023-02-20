@@ -66,7 +66,7 @@ namespace SGE {
             NUM_BUFFERS = 5
         };
     public:
-        AnimatedModel(const std::string& modelPath, bool flipUVS = false);
+        AnimatedModel(const std::string& modelPath, bool flipUVS);
         ~AnimatedModel();
 
         static Ref<AnimatedModel> CreateAnimatedModel(const std::string& modelPath, bool flipUVS = false);

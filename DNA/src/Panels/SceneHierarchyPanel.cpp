@@ -20,7 +20,7 @@ namespace SGE {
 		ImGui::SetNextItemOpen(true);
 		if (ImGui::TreeNode(m_SceneContext->GetSceneName().c_str()))
 		{
-			//ScenePopupWindows();
+			ScenePopupWindows();
 
 			// Scene Hierarchy
 			if (m_align_label_with_current_x_position)
@@ -95,6 +95,8 @@ namespace SGE {
 	void SceneHierarchyPanel::ShowSelectedComponents()
 	{
 		ImGui::Begin("Properties");
+
+		// Entity components panels
 		if(m_SelectedEntity.HasComponent<TagComponent>())
 		{
 			auto& tag = m_SelectedEntity.GetComponent<TagComponent>();
@@ -199,22 +201,24 @@ namespace SGE {
 				}
 			}
 		}
-		
-		if(m_SelectedEntity.HasComponent<RigidBody2DComponent>())
+
+		if(m_SelectedEntity.HasComponent<RigidBodyComponent>())
 		{
 			if (ImGui::CollapsingHeader("RigidBody Component"))
 			{
 				static float rate = 0.2f;
-				auto& rb = m_SelectedEntity.GetComponent<RigidBody2DComponent>();
-				switch (rb.Type)
+				auto& rb = m_SelectedEntity.GetComponent<RigidBodyComponent>();
+
+				//TODO: Add body types to 3d Rigidbodies
+				switch (rb.Body.Type)
 				{
-					case RigidBody2DComponent::BodyType::Static:
+					case flg::BodyType::Static:
 						ImGui::Text("Static");
 						break;
-					case RigidBody2DComponent::BodyType::Dynamic:
+					case flg::BodyType::Dynamic:
 						ImGui::Text("Dynamic");
 						break;
-					case RigidBody2DComponent::BodyType::Kinematic:
+					case flg::BodyType::Kinematic:
 						ImGui::Text("Kinematic");
 						break;
 					default:
@@ -222,13 +226,39 @@ namespace SGE {
 						break;
 				};
 
-				if (ImGui::RadioButton("Static", rb.Type == RigidBody2DComponent::BodyType::Static)) { rb.Type = RigidBody2DComponent::BodyType::Static; } ImGui::SameLine();
-				if (ImGui::RadioButton("Dynamic", rb.Type == RigidBody2DComponent::BodyType::Dynamic)) { rb.Type = RigidBody2DComponent::BodyType::Dynamic; } ImGui::SameLine();
-				if (ImGui::RadioButton("Kinematic", rb.Type == RigidBody2DComponent::BodyType::Kinematic)) { rb.Type = RigidBody2DComponent::BodyType::Kinematic; } ImGui::SameLine();
+				if (ImGui::RadioButton("Static", rb.Body.Type == flg::BodyType::Static)) { rb.Body.Type = flg::BodyType::Static; } ImGui::SameLine();
+				if (ImGui::RadioButton("Dynamic", rb.Body.Type == flg::BodyType::Dynamic)) { rb.Body.Type = flg::BodyType::Dynamic; } ImGui::SameLine();
+				if (ImGui::RadioButton("Kinematic", rb.Body.Type == flg::BodyType::Kinematic)) { rb.Body.Type = flg::BodyType::Kinematic; } ImGui::SameLine();
+				ImGui::Checkbox("UseGravity", &rb.UseGravity);
 			}
 		}
 
-		// Add Component PopUp
+		if(m_SelectedEntity.HasComponent<SphereColliderComponent>())
+		{
+			if (ImGui::CollapsingHeader("SphereCollider Component"))
+			{
+				static float rate = 0.2f;
+				auto& collider = m_SelectedEntity.GetComponent<SphereColliderComponent>();
+				glm::vec3 offset = collider.sphereCollider.Center - m_SelectedEntity.GetComponent<TransformComponent>().Position;
+				ImGui::DragFloat3("Center", &collider.sphereCollider.Center.x);
+				ImGui::DragFloat3("Offset", &offset.x); 
+				ImGui::DragFloat("Radius", &collider.sphereCollider.Radius); ImGui::NewLine();
+			}
+		}
+
+		if(m_SelectedEntity.HasComponent<PlaneColliderComponent>())
+		{
+			if (ImGui::CollapsingHeader("PlaneCollider Component"))
+			{
+				static float rate = 0.2f;
+				auto& collider = m_SelectedEntity.GetComponent<PlaneColliderComponent>();
+				ImGui::DragFloat3("Normal", &collider.planeCollider.Normal.x); ImGui::NewLine();
+				ImGui::DragFloat3("Origin", &collider.planeCollider.Origin.x); ImGui::NewLine();
+				ImGui::DragFloat2("Bounds", &collider.planeCollider.Bounds.x);
+			}
+		}
+
+		// Add component popup
 		{
 			static const char* title = "+ Add New Component";
 			if (ImGui::Button(title, ImVec2{ImGui::GetWindowWidth(), 0}) && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow) 
@@ -248,17 +278,33 @@ namespace SGE {
 
 				if (ImGui::BeginMenu("Physics"))
 				{
-					if(ImGui::MenuItem("RigidBody2D"))
+					if(ImGui::MenuItem("RigidBody"))
 					{
-						if(!m_SelectedEntity.HasComponent<RigidBody2DComponent>())
-							m_SelectedEntity.AddComponent<SGE::RigidBody2DComponent>();
+						if(!m_SelectedEntity.HasComponent<RigidBodyComponent>())
+							m_SelectedEntity.AddComponent<SGE::RigidBodyComponent>();
 					}
 
-					if(ImGui::MenuItem("BoxCollider 2D"))
+					if(ImGui::MenuItem("SphereCollider"))
 					{
-						if(!m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-							m_SelectedEntity.AddComponent<BoxCollider2DComponent>();
+						if(!m_SelectedEntity.HasComponent<SphereColliderComponent>()) 
+						{
+							auto& collider = m_SelectedEntity.AddComponent<SphereColliderComponent>();
+
+							// These are in terms of world positions
+							collider.sphereCollider.Center = m_SelectedEntity.GetComponent<TransformComponent>().Position + collider.sphereCollider.Center;
+							collider.sphereCollider.Radius = 1.0f;
+						}
 					}
+
+					if(ImGui::MenuItem("PlaneCollider"))
+					{
+						if(!m_SelectedEntity.HasComponent<PlaneColliderComponent>())
+						{
+							auto& pColliderComponent = m_SelectedEntity.AddComponent<PlaneColliderComponent>();
+							pColliderComponent.planeCollider.Origin = m_SelectedEntity.GetComponent<TransformComponent>().Position;
+						}
+					}
+
 					ImGui::EndMenu();
 				}
 

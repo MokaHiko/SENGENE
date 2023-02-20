@@ -111,32 +111,20 @@ namespace SGE {
       RigidBodyComponent(const RigidBodyComponent& other) = default;
    };
 
-   struct RigidBody2DComponent
+   struct SphereColliderComponent
    {
-       enum class BodyType {Static = 0, Dynamic, Kinematic};
+      flg::SphereCollider sphereCollider;
 
-       BodyType Type = BodyType::Static;
-       void* RuntimeBody = nullptr;
-
-       RigidBody2DComponent() = default;
-       RigidBody2DComponent(const RigidBody2DComponent& other) = default;
+      SphereColliderComponent() = default;
+      SphereColliderComponent(const SphereColliderComponent& other) = default;
    };
 
-   struct BoxCollider2DComponent
+   struct PlaneColliderComponent
    {
-       glm::vec2 offset = { 0.0, 0.0 };
-       glm::vec2 scale = { 0.5, 0.5 };
+      flg::PlaneCollider planeCollider;
 
-       void* RuntimeFixture = nullptr;
-
-       // TODO: Make Physics Material
-       float Density = 1.0f;
-       float Friction = 0.5f;
-       float Restitution = 0.5f;
-       float RestitutionThreshold = 0.5f;
-
-       BoxCollider2DComponent() = default;
-       BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
+      PlaneColliderComponent() = default;
+      PlaneColliderComponent(const PlaneColliderComponent& other) = default;
    };
 }
 

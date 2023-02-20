@@ -7,36 +7,41 @@
 #include <vector>
 
 #include "Body.h"
-#include "Ray.h"
+#include "Collider.h"
 
-namespace flg {
+namespace flg
+{
     struct PhysicsWorldProperties
     {
         glm::vec3 Gravity = {0.0f, -9.81f, 0.0f};
     };
 
     // World that holds a reference to all physics bodies
-    class PhysicsWorld 
+    class PhysicsWorld
     {
     public:
-        PhysicsWorld(const PhysicsWorld& other) = delete;
-        void operator=(const PhysicsWorld& other) = delete;
+        PhysicsWorld(const PhysicsWorld &other) = delete;
+        void operator=(const PhysicsWorld &other) = delete;
         ~PhysicsWorld();
 
         static void Step(float dt);
-        static void AddBody(Body* body);
-        static void RemoveBody(Body* body);
+        static void AddBody(Body *body);
+        static void RemoveBody(Body *body);
         static void Clear();
+
     public:
-        static Raycasthit Raycast(const Ray& ray, float distance = 1000.0f)
+        struct Raycasthit
         {
-            // TODO: Check collision with bodies
-            Raycasthit hit = Raycasthit();
-            return hit;
+            glm::vec3 CollisionPoint = {};
+            Body *body;
+            bool DidHit() { return body != nullptr; };
         };
+
+        static Raycasthit Raycast(const Ray *ray, float distance = 1000.0f);
+
     private:
-        PhysicsWorld(){}
-        static std::vector<Body*> m_Bodies;
+        PhysicsWorld() {}
+        static std::vector<Body *> m_Bodies;
         static PhysicsWorldProperties m_Properties;
     };
 }

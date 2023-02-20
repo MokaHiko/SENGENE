@@ -147,26 +147,6 @@ namespace SGE {
 					deserializedEntity.AddComponent<SkinnedMeshRendererComponent>(AnimatedModel::CreateAnimatedModel(path, flipUVS));
 				}
 
-				auto rigidBody2DComponent = entity["RigidBody2DComponent"];
-				if(rigidBody2DComponent)
-				{
-					auto& rb2DComponent = deserializedEntity.AddComponent<RigidBody2DComponent>();
-					rb2DComponent.Type = static_cast<RigidBody2DComponent::BodyType>(rigidBody2DComponent["BodyType"].as<int>());
-				}
-
-				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
-				if(boxCollider2DComponent)
-				{
-					auto& b2dComponent = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-					b2dComponent.offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
-					b2dComponent.scale = boxCollider2DComponent["Scale"].as<glm::vec2>();
-
-					b2dComponent.Density = boxCollider2DComponent["Density"].as<float>();
-					b2dComponent.Friction = boxCollider2DComponent["Friction"].as<float>();
-					b2dComponent.Restitution = boxCollider2DComponent["Restitution"].as<float>();
-					b2dComponent.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
-				}
-
 				auto directionalLightComponent = entity["DirectionalLightComponent"];
 				if(directionalLightComponent)
 				{
@@ -176,7 +156,7 @@ namespace SGE {
 					dlComponent.Specular = directionalLightComponent["Specular"].as<glm::vec3>();
 				}
 
-				auto pointLightComponent = entity["poiintLightComponent"];
+				auto pointLightComponent = entity["PointLightComponent"];
 				if(pointLightComponent)
 				{
 					auto& plComponent = deserializedEntity.AddComponent<PointLightComponent>();
@@ -192,8 +172,32 @@ namespace SGE {
 				auto cam3DComponent = entity["Camera3DComponent"];
 				if(cam3DComponent)
 				{
-					auto&  camComponent = deserializedEntity.AddComponent<Camera3DComponent>();
+					auto& camComponent = deserializedEntity.AddComponent<Camera3DComponent>();
 					camComponent.IsActive = cam3DComponent["IsActive"].as<bool>();
+				}
+
+				auto rbComponent = entity["RigidBodyComponent"];
+				if(rbComponent)
+				{
+					auto& rb = deserializedEntity.AddComponent<RigidBodyComponent>();
+					rb.UseGravity = rbComponent["UseGravity"].as<bool>();
+				}
+
+				auto sphereColliderComponent = entity["SphereColliderComponent"];
+				if(sphereColliderComponent)
+				{
+					auto& sphereCollider = deserializedEntity.AddComponent<SphereColliderComponent>();
+					sphereCollider.sphereCollider.Center = sphereColliderComponent["Center"].as<glm::vec3>();
+					sphereCollider.sphereCollider.Radius = sphereColliderComponent["Radius"].as<float>();
+				}
+
+				auto planeColliderComponent = entity["PlaneColliderComponent"];
+				if(planeColliderComponent)
+				{
+					auto& planeCollider = deserializedEntity.AddComponent<PlaneColliderComponent>();
+					planeCollider.planeCollider.Origin = planeColliderComponent["Origin"].as<glm::vec3>();
+					planeCollider.planeCollider.Normal = planeColliderComponent["Normal"].as<glm::vec3>();
+					planeCollider.planeCollider.Bounds = planeColliderComponent["Bounds"].as<glm::vec2>();
 				}
 			}
 		}
@@ -262,33 +266,6 @@ namespace SGE {
 			out << YAML::EndMap;
 		}
 
-		if(entity.HasComponent<RigidBody2DComponent>())
-		{
-			out << YAML::Key << "RigidBody2DComponent";
-			out << YAML::BeginMap;
-
-			auto& rb2D = entity.GetComponent<RigidBody2DComponent>();
-			out << YAML::Key << "BodyType" << YAML::Value << (int)rb2D.Type;
-
-			out << YAML::EndMap;
-		}
-
-		if(entity.HasComponent<BoxCollider2DComponent>())
-		{
-			out << YAML::Key << "BoxCollider2DComponent";
-			out << YAML::BeginMap;
-
-			auto& boxCollider2D = entity.GetComponent<BoxCollider2DComponent>();
-			out << YAML::Key << "Offset" << YAML::Value << boxCollider2D.offset;
-			out << YAML::Key << "Scale" << YAML::Value << boxCollider2D.scale;
-			out << YAML::Key << "Density" << YAML::Value << boxCollider2D.Density;
-			out << YAML::Key << "Friction" << YAML::Value << boxCollider2D.Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << boxCollider2D.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << boxCollider2D.RestitutionThreshold;
-
-			out << YAML::EndMap;
-		}
-
 		if (entity.HasComponent<DirectionalLightComponent>())
 		{
 			out << YAML::Key << "DirectionalLightComponent";
@@ -326,6 +303,42 @@ namespace SGE {
 
 			auto&  cam3DComponent = entity.GetComponent<Camera3DComponent>();
 			out << YAML::Key << "IsActive" << YAML::Value << cam3DComponent.IsActive;
+
+			out <<YAML::EndMap;
+		}
+
+		if (entity.HasComponent<RigidBodyComponent>())
+		{
+			out << YAML::Key << "RigidBodyComponent";
+			out << YAML::BeginMap;
+
+			auto&  rbComponent = entity.GetComponent<RigidBodyComponent>();
+			out << YAML::Key << "UseGravity" << YAML::Value << rbComponent.UseGravity;
+
+			out <<YAML::EndMap;
+		}
+
+		if (entity.HasComponent<SphereColliderComponent>())
+		{
+			out << YAML::Key << "SphereColliderComponent";
+			out << YAML::BeginMap;
+
+			auto&  sphereCollider = entity.GetComponent<SphereColliderComponent>();
+			out << YAML::Key << "Center" << YAML::Value << sphereCollider.sphereCollider.Center - entity.GetComponent<TransformComponent>().Position;
+			out << YAML::Key << "Radius" << YAML::Value << sphereCollider.sphereCollider.Radius;
+
+			out <<YAML::EndMap;
+		}
+
+		if (entity.HasComponent<PlaneColliderComponent>())
+		{
+			out << YAML::Key << "PlaneColliderComponent";
+			out << YAML::BeginMap;
+
+			auto&  planeCollider = entity.GetComponent<PlaneColliderComponent>();
+			out << YAML::Key << "Origin" << YAML::Value << planeCollider.planeCollider.Origin;
+			out << YAML::Key << "Normal" << YAML::Value << planeCollider.planeCollider.Normal;
+			out << YAML::Key << "Bounds" << YAML::Value << planeCollider.planeCollider.Bounds;
 
 			out <<YAML::EndMap;
 		}

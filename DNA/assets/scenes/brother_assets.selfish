@@ -4,12 +4,12 @@ Entities:
     TagComponent:
       Tag: mutant1
     TransformComponent:
-      Position: [159.600006, 0, -128]
+      Position: [0, 0, 0]
       Rotation: [0, 0, 0.00131924055]
       Scale: [1, 1, 1]
     SkinnedMeshRendererComponent:
       Path: assets/models/mutant/mutant.fbx
-      FlipUVS: true
+      FlipUVS: false
   - Entity: 42312412
     TagComponent:
       Tag: mutant2
@@ -19,7 +19,7 @@ Entities:
       Scale: [1, 1, 1]
     SkinnedMeshRendererComponent:
       Path: assets/models/mutant/mutant.fbx
-      FlipUVS: true
+      FlipUVS: false
   - Entity: 42312412
     TagComponent:
       Tag: SomeTestCube
@@ -46,11 +46,19 @@ Entities:
       Scale: [1, 1.39999998, 1]
   - Entity: 42312412
     TagComponent:
-      Tag: SomeTestCube
+      Tag: CollisionCube
     TransformComponent:
-      Position: [-3.4000001, 18.3999996, 0.400000006]
+      Position: [-0.800000012, 68.4000015, 120]
       Rotation: [0, 0, 0]
       Scale: [1, 1.39999998, 1]
+    MeshRendererComponent:
+      Path: assets/models/cube/cube.obj
+      FlipUVS: false
+    RigidBodyComponent:
+      UseGravity: true
+    SphereColliderComponent:
+      Center: [0, 0, 0]
+      Radius: 1
   - Entity: 42312412
     TagComponent:
       Tag: XBot
@@ -76,7 +84,7 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Position: [3.88482499, 86.4042587, 202.896622]
+      Position: [-11.0159416, 37.4583664, 162.196762]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     Camera3DComponent:
@@ -95,12 +103,18 @@ Entities:
     TagComponent:
       Tag: Terrain
     TransformComponent:
-      Position: [-19.3999996, -6.5999999, 56]
-      Rotation: [0, 0, 0.00131924055]
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
       Scale: [500, 1, 500]
     MeshRendererComponent:
       Path: assets/models/cube/cube.obj
       FlipUVS: false
+    RigidBodyComponent:
+      UseGravity: true
+    PlaneColliderComponent:
+      Origin: [0, 0, 0]
+      Normal: [0, 1, 0]
+      Bounds: [0, 0]
   - Entity: 42312412
     TagComponent:
       Tag: mutant
@@ -110,7 +124,7 @@ Entities:
       Scale: [1, 1, 1]
     SkinnedMeshRendererComponent:
       Path: assets/models/mutant/mutant.fbx
-      FlipUVS: true
+      FlipUVS: false
   - Entity: 42312412
     TagComponent:
       Tag: Tree2

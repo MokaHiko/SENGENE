@@ -1,5 +1,4 @@
 #include "Physics.h"
-#include <iostream>
 
 namespace flg {
 	std::vector<Body*> PhysicsWorld::m_Bodies{};
@@ -14,13 +13,46 @@ namespace flg {
 	{
 		for(Body* body : m_Bodies)
 		{
-			body->Force += body->Mass * m_Properties.Gravity;
+			if(body->BodyCollider)
+			{
+				// TODO: Check Collisions
+
+				// Update Collider Positions
+			}
+
+			if(body->Type != BodyType::Static) 
+				body->Force += body->Mass * m_Properties.Gravity;
 
 			body->Velocity += (body->Force / body->Mass) * dt;
 			body->BodyTransform.Position += body->Velocity * dt;
 
 			body->Force = glm::vec3{0.0f};
 		}
+	}
+
+	PhysicsWorld::Raycasthit PhysicsWorld::Raycast(const Ray* ray, float distance)
+	{
+		Raycasthit hit = Raycasthit();
+
+		// TODO: Optimize with accelerated structures
+		for(Body* body : m_Bodies)
+		{
+			if(body->BodyCollider != nullptr)
+			{
+				// Check Collision
+				Transform* t = &body->BodyTransform;
+				CollisionPoints col = body->BodyCollider->TestCollision(t, ray, nullptr);
+
+				if(col.DidCollide) 
+				{
+					hit.CollisionPoint = col.A;
+					hit.body = body;
+					break;
+				}
+			}
+		}
+
+		return hit;
 	}
 	
 	void PhysicsWorld::AddBody(Body* body)
@@ -37,5 +69,6 @@ namespace flg {
 	{
 		m_Bodies.clear();
 	}
+
 
 }

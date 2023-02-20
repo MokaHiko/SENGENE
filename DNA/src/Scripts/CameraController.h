@@ -5,6 +5,7 @@
 
 #include "SGE/SGE.h"
 #include "SGE/Events/MouseEvent.h"
+#include "Algorithms.h"
 
 class CameraController : public SGE::ScriptableEntity
 {
@@ -17,41 +18,31 @@ public:
 
     virtual void OnCreate() override
     {
-        auto& watcher = AddComponent<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>();
+        auto &watcher = AddComponent<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>();
         watcher.Watch(std::bind(&CameraController::MouseMoveEventCallBack, this, std::placeholders::_1));
     }
 
     virtual void OnStart() override
     {
-        std::cout << "Created Camera Controller" << std::endl;
         m_Camera = SGE::Ref<SGE::Camera3D>(&GetComponent<SGE::Camera3DComponent>().camera);
     }
 
     virtual void OnUpdate(SGE::TimeStep timestep) override
     {
-        if (SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) 
-        {
-            glm::vec3 rayDir = MouseToWorldCoordinates();
-            auto ray = flg::Ray(GetComponent<SGE::TransformComponent>().Position, rayDir);
-            flg::PhysicsWorld::Raycast(ray);
-        }
-        if (!SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
-            return;
-
         // Handle KeyBoard Input
-        glm::vec3& cameraPosition = GetComponent<SGE::TransformComponent>().Position;
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_W))
-                cameraPosition += m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_S))
-                cameraPosition -= m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_D))
-                cameraPosition += m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_A))
-                cameraPosition -= m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_SPACE))
-                cameraPosition += m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
-        if(SGE::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
-                cameraPosition -= m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
+        glm::vec3 &cameraPosition = GetComponent<SGE::TransformComponent>().Position;
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_W))
+            cameraPosition += m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_S))
+            cameraPosition -= m_Camera->GetFront() * MovementSpeed * timestep.GetSeconds();
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_D))
+            cameraPosition += m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_A))
+            cameraPosition -= m_Camera->GetRight() * MovementSpeed * timestep.GetSeconds();
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_SPACE))
+            cameraPosition += m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
+        if (SGE::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
+            cameraPosition -= m_Camera->GetUp() * MovementSpeed * timestep.GetSeconds();
     }
 
     glm::vec3 MouseToWorldCoordinates()
@@ -66,7 +57,7 @@ public:
 
     glm::vec2 ScreenToNDC(float x, float y)
     {
-        glm::vec2 ndc= {};
+        glm::vec2 ndc = {};
         float viewPortWidth = static_cast<float>(SGE::Renderer::GetSceneData().SceneWidth);
         float viewPortHeight = static_cast<float>(SGE::Renderer::GetSceneData().SceneHeight);
         ndc.x = (x * 2.0f) / viewPortWidth - 1.0f;
@@ -75,7 +66,7 @@ public:
         return ndc;
     };
 
-    glm::vec4 ClipToEye(glm::vec4& clip)
+    glm::vec4 ClipToEye(glm::vec4 &clip)
     {
         glm::vec4 eye = glm::inverse(SGE::Renderer::GetSceneData().ProjectionMatrix) * clip;
         eye.z = -1.0f;
@@ -83,13 +74,13 @@ public:
         return eye;
     };
 
-    glm::vec3 EyeToWorld(const glm::vec4& eye)
+    glm::vec3 EyeToWorld(const glm::vec4 &eye)
     {
         glm::vec4 worldCoords = glm::inverse(m_Camera->GetViewMatrix()) * eye;
         return glm::vec3(worldCoords);
     }
 
-    void MouseMoveEventCallBack(SGE::MouseMoveEvent& event)
+    void MouseMoveEventCallBack(SGE::MouseMoveEvent &event)
     {
         if (!SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
         {
@@ -97,8 +88,8 @@ public:
             return;
         }
 
-        auto [x,y] = event.GetMouseCoordinates();
-        if(m_FirstMove)
+        auto [x, y] = event.GetMouseCoordinates();
+        if (m_FirstMove)
         {
             m_LastX = x;
             m_LastY = y;
@@ -107,7 +98,7 @@ public:
 
         float xOffset = x - m_LastX;
         float yOffset = m_LastY - y;
-        
+
         m_LastX = x;
         m_LastY = y;
 
@@ -127,11 +118,11 @@ private:
         m_Camera->m_Yaw += xoffset;
         m_Camera->m_Pitch += yoffset;
 
-        if(ConstrainPitch)
+        if (ConstrainPitch)
         {
-            if(m_Camera->m_Pitch > 89.0f)
+            if (m_Camera->m_Pitch > 89.0f)
                 m_Camera->m_Pitch = 89.0f;
-            if(m_Camera->m_Pitch < -89.0f)
+            if (m_Camera->m_Pitch < -89.0f)
                 m_Camera->m_Pitch = -89.0f;
         }
     }

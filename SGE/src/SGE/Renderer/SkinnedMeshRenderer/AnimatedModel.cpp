@@ -32,8 +32,8 @@ namespace SGE {
 			glGenBuffers(1, &m_Buffers[i]);
 
 		printf("MODEL::LOADING %s ==> ", modelPath.c_str());
+		printf(" - flipUVS: %s\n", flipUVS ? "True" : "False");
 		LoadAnimatedModel(modelPath, flipUVS);
-		printf("SUCCESS\n");
 	}
 
 	AnimatedModel::~AnimatedModel()

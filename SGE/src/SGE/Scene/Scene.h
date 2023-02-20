@@ -75,12 +75,6 @@ namespace SGE {
             if (otherEntity.HasComponent<SkinnedMeshRendererComponent>())
                 entity.AddComponent<SkinnedMeshRendererComponent>(otherEntity.GetComponent<SkinnedMeshRendererComponent>().AnimatedModel);
 
-            if (otherEntity.HasComponent<BoxCollider2DComponent>())
-                entity.AddComponent<BoxCollider2DComponent>(otherEntity.GetComponent<BoxCollider2DComponent>());
-
-            if (otherEntity.HasComponent<RigidBody2DComponent>())
-                entity.AddComponent<RigidBody2DComponent>(otherEntity.GetComponent<RigidBody2DComponent>());
-
             return entity;
         }
 

@@ -45,6 +45,9 @@ namespace SGE {
             return m_EntityHandle != entt::null;
         }
 
+        const uint32_t Id() const {return static_cast<uint32_t>(m_EntityHandle);};
+        // TODO: : Make it more when accesed 
+        Scene* GetSceneHandle() const {return m_Scene;};
     private:
         entt::entity m_EntityHandle = entt::null;
         Scene* m_Scene = nullptr; // TODO: some sort of weak ptr

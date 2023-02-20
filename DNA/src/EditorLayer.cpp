@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Scripts/CameraController.h"
+#include "Scripts/Board.h"
 #include "Scripts/Unit.h"
 
 #include <Core/Application.h>
@@ -26,7 +27,6 @@ namespace SGE {
 
 EditorLayer::~EditorLayer()
 {
-	
 }
 
 void EditorLayer::OnAttach() 
@@ -48,7 +48,14 @@ void EditorLayer::OnAttach()
 
 		// Load Basic Shapes
 		SGE::Model::CreateModel("assets/models/cube/cube.obj");
-		LoadScene("assets/scenes/brother_assets.selfish");
+		LoadScene("assets/scenes/chess.selfish");
+	}
+
+	// Load Chess Game Demo
+	{
+		// Load Resources
+        SGE::AnimatedModel::CreateAnimatedModel("assets/models/mutant/mutant.fbx");
+		m_Scene->CreateEntity("MainBoard").AddComponent<SGE::NativeScriptComponent>().Bind<Board>();
 	}
 }
 
@@ -280,17 +287,6 @@ void EditorLayer::ResetScene()
 			SGE::Entity entity{ e, m_Scene.get()};
 			m_SceneData.DirectionalLight = entity;
 			break;
-		}
-	}
-
-	// Physics All Animated Models
-	// TODO: ADD RigidBody Serialization/Deserialization
-	{
-		auto view = m_Scene->Registry().view<SGE::SkinnedMeshRendererComponent>();
-		for (auto e: view)
-		{
-			SGE::Entity entity{ e, m_Scene.get()};
-			entity.AddComponent<SGE::RigidBodyComponent>();
 		}
 	}
 
