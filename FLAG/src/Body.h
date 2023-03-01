@@ -5,7 +5,8 @@
 
 #include <glm/glm.hpp>
 
-namespace flg {
+namespace flg
+{
     enum BodyType
     {
         Static = 0,
@@ -20,7 +21,7 @@ namespace flg {
         glm::vec3 Scale;
 
         Transform()
-            :Position(0.0f), Rotation(0.0f), Scale(1.0f) {}
+            : Position(0.0f), Rotation(0.0f), Scale(1.0f) {}
     };
 
     struct Collider;
@@ -32,19 +33,21 @@ namespace flg {
         float Mass;
 
         BodyType Type;
-        Collider* BodyCollider;
+        Collider *BodyCollider;
         bool UseGravity;
 
         Body(uint32_t ownerEntityID = -1)
-            :OwnerEntityID(ownerEntityID), BodyTransform({}), Velocity(0.0f), Force(0.0f), Mass(1.0f), Type(BodyType::Static), BodyCollider(nullptr)
-        {}
+            : OwnerEntityID(ownerEntityID), BodyTransform({}), Velocity(0.0f), Force(0.0f), Mass(1.0f), Type(BodyType::Static), BodyCollider(nullptr)
+        {
+        }
 
-        const glm::vec3& GetPosition() {return BodyTransform.Position;};
+        const glm::vec3 &GetPosition() { return BodyTransform.Position; };
 
-        void SetEntityOwnerID(uint32_t id) {OwnerEntityID = id;};
-        uint32_t GetEntityOwnerID() {return OwnerEntityID;};
+        void SetEntityOwnerID(uint32_t id) { OwnerEntityID = id; };
+        uint32_t GetEntityOwnerID() { return OwnerEntityID; };
+
     private:
         uint32_t OwnerEntityID;
     };
-} 
+}
 #endif

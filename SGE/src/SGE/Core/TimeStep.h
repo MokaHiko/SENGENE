@@ -3,7 +3,8 @@
 
 #pragma once
 
-namespace SGE {
+namespace SGE
+{
     /*
         Time is always in seconds unless specified
     */
@@ -12,15 +13,16 @@ namespace SGE {
     {
     public:
         TimeStep(float time = 0.0f)
-            :m_Time(time)
+            : m_Time(time)
         {
         }
         ~TimeStep() = default;
 
-        operator float() const {return m_Time;}
-        
-        float GetSeconds() const {return m_Time;}
-        float GetMilliSeconds() const {return m_Time * 1000.0f;}
+        operator float() const { return m_Time; }
+
+        float GetSeconds() const { return m_Time; }
+        float GetMilliSeconds() const { return m_Time * 1000.0f; }
+
     private:
         float m_Time;
     };

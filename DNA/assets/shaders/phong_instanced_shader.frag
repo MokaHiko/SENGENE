@@ -63,7 +63,11 @@ void main()
 	for(int i = 0; i < u_NPointLights; i++)
 		result += CalculatePointLight(u_PointLights[i], norm, FragPos, viewDir);
 		
-	FragColor = vec4(result, 1.0f);
+	float alpha = texture(u_Material.texture_diffuse1, v_TexCoord).a;
+	if(alpha < 0.1f)
+		discard;
+
+	FragColor = vec4(result, alpha);
 }
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)

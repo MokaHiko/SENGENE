@@ -42,9 +42,14 @@ public:
         {
             glm::vec3 direction = m_Destination - GameObject().GetComponent<SGE::TransformComponent>().Position;
             if (direction.length() < 0.001f)
+            {
+                GameObject().GetComponent<SGE::RigidBodyComponent>().Body.Velocity = {0, 0, 0};
                 m_IsMoving = false;
+            }
             else
-                GameObject().GetComponent<SGE::TransformComponent>().Position += direction * m_Velocity * timestep.GetSeconds();
+            {
+                GameObject().GetComponent<SGE::RigidBodyComponent>().Body.Velocity = glm::normalize(direction) * m_Velocity * 10.0f * timestep.GetSeconds();
+            }
         }
     };
 
@@ -58,7 +63,7 @@ public:
 private:
     float m_Time = 0.0f;
     glm::vec3 m_Destination = {};
-    float m_Velocity = 1.0f;
+    float m_Velocity = 250.0f;
     bool m_IsMoving = false;
 };
 

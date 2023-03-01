@@ -34,6 +34,7 @@ namespace flg
         {
             glm::vec3 CollisionPoint = {};
             Body *body;
+
             bool DidHit() { return body != nullptr; };
         };
 

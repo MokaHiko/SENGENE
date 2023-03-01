@@ -3,38 +3,40 @@
 #include "Body.h"
 #include "Collider.h"
 
-namespace flg{    
-	namespace algo{
+namespace flg
+{
+	namespace algo
+	{
 		// --- Ray/Raycasts ---
-		static CollisionPoints FindRayPlaneCollisionPoints(const Ray* ray, const Collider* collider)
+		static CollisionPoints FindRayPlaneCollisionPoints(const Ray *ray, const Collider *collider)
 		{
-			//return collider->TestCollision((Collider*)(nullptr), ray, ray->Origin);
+			// return collider->TestCollision((Collider*)(nullptr), ray, ray->Origin);
 			return CollisionPoints{};
 		}
-		static CollisionPoints FindRayPlaneCollisionPoints(const Ray* ray, const PlaneCollider* plane)
+		static CollisionPoints FindRayPlaneCollisionPoints(const Ray *ray, const PlaneCollider *plane)
 		{
 			// Rays' origin is a point on the plane.
-			if(ray->Origin == plane->Origin)
+			if (ray->Origin == plane->Origin)
 				return CollisionPoints{ray->Origin, true};
-			
+
 			// Ray and plane are perpendicular.
 			float rayDirectionDotPlaneNormal = glm::dot(ray->Direction, plane->Normal);
-			if(rayDirectionDotPlaneNormal == 0)
+			if (rayDirectionDotPlaneNormal == 0)
 				return CollisionPoints{glm::vec3{0.0f}, false};
 
 			float t = glm::dot(plane->Origin - ray->Origin, plane->Normal) / rayDirectionDotPlaneNormal;
 			return CollisionPoints{ray->Origin + (t * ray->Direction), t > 0 ? true : false};
 		}
 
-		static CollisionPoints FindRaySphereCollisionPoints(const Ray* ray, const SphereCollider* sphere)
+		static CollisionPoints FindRaySphereCollisionPoints(const Ray *ray, const SphereCollider *sphere)
 		{
 			float b = glm::dot(ray->Direction, ray->Origin - sphere->Center);
 			float c = glm::dot(ray->Origin - sphere->Center, ray->Origin - sphere->Center) - (sphere->Radius * sphere->Radius);
 
 			float discriminant = b * b - c;
-			
+
 			// No collision
-			if(discriminant < 0)
+			if (discriminant < 0)
 				return CollisionPoints{};
 
 			// TODO: Optional calculate Point of collision
@@ -51,22 +53,22 @@ namespace flg{
 
 		// --- Physics Colliders Fns ---
 		static CollisionPoints FindSphereSphereColissionPoints(
-			const SphereCollider* a, const Transform* ta,
-			const SphereCollider* b, const Transform* tb) 
+			const SphereCollider *a, const Transform *ta,
+			const SphereCollider *b, const Transform *tb)
 		{
 			return {};
 		}
 
 		static CollisionPoints FindSpherePlaneCollissionPoints(
-			const SphereCollider* a, const Transform* ta,
-			const PlaneCollider* b, const Transform* tb) 
+			const SphereCollider *a, const Transform *ta,
+			const PlaneCollider *b, const Transform *tb)
 		{
 			return {};
 		}
 
 		static CollisionPoints FindPlaneSphereCollissionPoints(
-			const PlaneCollider* a, const Transform* ta,
-			const SphereCollider* b, const Transform* tb)
+			const PlaneCollider *a, const Transform *ta,
+			const SphereCollider *b, const Transform *tb)
 		{
 			return {};
 		}

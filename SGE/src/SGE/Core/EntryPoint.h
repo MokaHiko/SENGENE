@@ -6,11 +6,12 @@
 #include "SGE/Core/Core.h"
 #include "SGE/Core/Application.h"
 
-extern SGE::Application* SGE::CreateApplication();
-int main(int, char**) {
-	SGE::Application* app = SGE::CreateApplication();
+extern SGE::Application *SGE::CreateApplication();
+int main(int, char **)
+{
+	SGE::Application *app = SGE::CreateApplication();
 	app->Run();
-	delete app;	
+	delete app;
 }
 
 #endif

@@ -5,7 +5,8 @@
 
 #include "Core/Application.h"
 
-namespace SGE {
+namespace SGE
+{
     class Input
     {
     public:
@@ -16,7 +17,7 @@ namespace SGE {
         static float Input::GetMouseX();
 
         static float Input::GetMouseY();
-        
+
         static std::pair<float, float> Input::GetMousePosition();
     };
 }

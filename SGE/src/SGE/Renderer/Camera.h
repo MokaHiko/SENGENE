@@ -5,14 +5,15 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-namespace SGE {
-    enum class Camera_Movement 
+namespace SGE
+{
+    enum class Camera_Movement
     {
         FORWARD,
         BACKWARD,
         UP,
         DOWN,
-        LEFT, 
+        LEFT,
         RIGHT,
     };
 
@@ -24,12 +25,13 @@ namespace SGE {
 
         glm::mat4 const GetViewMatrix() const;
 
-        void CalculateViewMatrix(const glm::vec3& position);
+        void CalculateViewMatrix(const glm::vec3 &position);
         void UpdateCameraVectors();
 
-        const glm::vec3& GetFront() {return m_Front;}
-        const glm::vec3& GetRight() {return m_Right;}
-        const glm::vec3& GetUp() {return m_Up;}
+        const glm::vec3 &GetFront() { return m_Front; }
+        const glm::vec3 &GetRight() { return m_Right; }
+        const glm::vec3 &GetUp() { return m_Up; }
+
     public:
         // Camera Relative Position Attributes
         glm::vec3 m_Front;
@@ -44,6 +46,7 @@ namespace SGE {
         float m_Speed = 2.5f;
         float m_Zoom = 45.0f;
         float m_Sensitivity = 0.1f;
+
     private:
         glm::mat4 m_ViewMatrix;
     };

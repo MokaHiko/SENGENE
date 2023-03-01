@@ -3,9 +3,9 @@
 
 #pragma once
 
+namespace SGE
+{
 
-namespace SGE {
-    
 }
 
 #endif

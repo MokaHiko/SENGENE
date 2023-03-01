@@ -17,11 +17,15 @@
 // Define Inputs relative to viewport in edit mode
 glm::vec2 EditorLayer::editorMouseInput = glm::vec2{0.0f};
 
-namespace SGE {
+namespace SGE
+{
 #ifndef SGE_RELEASE_MODE
-	float Input::GetMouseX() { return EditorLayer::editorMouseInput.x;}
-	float Input::GetMouseY(){return EditorLayer::editorMouseInput.y;}
-	std::pair<float, float> Input::GetMousePosition() { return std::pair<float, float>(EditorLayer::editorMouseInput.x, EditorLayer::editorMouseInput.y);}
+	float Input::GetMouseX()
+	{
+		return EditorLayer::editorMouseInput.x;
+	}
+	float Input::GetMouseY() { return EditorLayer::editorMouseInput.y; }
+	std::pair<float, float> Input::GetMousePosition() { return std::pair<float, float>(EditorLayer::editorMouseInput.x, EditorLayer::editorMouseInput.y); }
 #endif
 }
 
@@ -29,7 +33,7 @@ EditorLayer::~EditorLayer()
 {
 }
 
-void EditorLayer::OnAttach() 
+void EditorLayer::OnAttach()
 {
 	// Configure App Settings
 	{
@@ -54,7 +58,7 @@ void EditorLayer::OnAttach()
 	// Load Chess Game Demo
 	{
 		// Load Resources
-        SGE::AnimatedModel::CreateAnimatedModel("assets/models/mutant/mutant.fbx");
+		SGE::AnimatedModel::CreateAnimatedModel("assets/models/mutant/mutant.fbx", true);
 		m_Scene->CreateEntity("MainBoard").AddComponent<SGE::NativeScriptComponent>().Bind<Board>();
 	}
 }
@@ -63,18 +67,18 @@ void EditorLayer::OnDetach()
 {
 }
 
-void EditorLayer::OnEvent(SGE::Event& event)
+void EditorLayer::OnEvent(SGE::Event &event)
 {
-	if(event.GetEventType() == SGE::EventType::MouseMove) 
+	if (event.GetEventType() == SGE::EventType::MouseMove)
 	{
 		auto view = m_Scene->Registry().view<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>();
-		for(auto entity : view)
+		for (auto entity : view)
 		{
-			auto& eventWatcher = view.get<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>(entity);
-			eventWatcher.EntityCallBack(*(SGE::MouseMoveEvent*)&event);
+			auto &eventWatcher = view.get<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>(entity);
+			eventWatcher.EntityCallBack(*(SGE::MouseMoveEvent *)&event);
 		}
 	}
-	if(event.GetEventType() == SGE::EventType::WindowResize) 
+	if (event.GetEventType() == SGE::EventType::WindowResize)
 	{
 		SGE::EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<SGE::WindowResizeEvent>(std::bind(&EditorLayer::OnWindowResize, this, std::placeholders::_1));
@@ -90,8 +94,8 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts)
 	// Update editor relative input
 	auto [mx, my] = ImGui::GetMousePos();
 	int x = (int)(mx - m_SceneData.ViewPortBounds[0].x);
-	int y = (int)(my - m_SceneData.ViewPortBounds[0].y);	
-	EditorLayer::editorMouseInput = {x,y};
+	int y = (int)(my - m_SceneData.ViewPortBounds[0].y);
+	EditorLayer::editorMouseInput = {x, y};
 
 	m_Scene->Update(ts);
 
@@ -100,7 +104,7 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts)
 	// --------- Renderering ---------
 
 	// Common Render Commands
-	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClearColor(0.1f, 0.1, 0.1, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SGE::Renderer::Begin(); // TODO: Give Renderers Unique Cameras
@@ -123,52 +127,52 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts)
 void EditorLayer::OnImGuiRender()
 {
 	static bool opt_isOpen = true;
-    static bool opt_fullscreen = true;
-    static bool opt_padding = false;
-    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	static bool opt_fullscreen = true;
+	static bool opt_padding = false;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
-    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-    // because it would be confusing to have two docking targets within each others.
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    if (opt_fullscreen)
-    {
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->WorkPos);
-        ImGui::SetNextWindowSize(viewport->WorkSize);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    }
-    else
-    {
-        dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-    }
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	if (opt_fullscreen)
+	{
+		const ImGuiViewport *viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	}
+	else
+	{
+		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+	}
 
-    if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-        window_flags |= ImGuiWindowFlags_NoBackground;
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		window_flags |= ImGuiWindowFlags_NoBackground;
 
-    if (!opt_padding)
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("DockSpace Demo", &opt_isOpen, window_flags);
-    if (!opt_padding)
-        ImGui::PopStyleVar();
+	if (!opt_padding)
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("DockSpace Demo", &opt_isOpen, window_flags);
+	if (!opt_padding)
+		ImGui::PopStyleVar();
 
-    if (opt_fullscreen)
-        ImGui::PopStyleVar(2);
+	if (opt_fullscreen)
+		ImGui::PopStyleVar(2);
 
-    // Submit the DockSpace
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-    {
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-    }
-    else
-    {
+	// Submit the DockSpace
+	ImGuiIO &io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+	{
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+	}
+	else
+	{
 		std::cout << "Docking Disabled" << std::endl;
-    }
+	}
 
 	// Menus
 	if (ImGui::BeginMainMenuBar())
@@ -181,12 +185,22 @@ void EditorLayer::OnImGuiRender()
 		}
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+			if (ImGui::MenuItem("Undo", "CTRL+Z"))
+			{
+			}
+			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false))
+			{
+			} // Disabled item
 			ImGui::Separator();
-			if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-			if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-			if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+			if (ImGui::MenuItem("Cut", "CTRL+X"))
+			{
+			}
+			if (ImGui::MenuItem("Copy", "CTRL+C"))
+			{
+			}
+			if (ImGui::MenuItem("Paste", "CTRL+V"))
+			{
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Window"))
@@ -199,11 +213,26 @@ void EditorLayer::OnImGuiRender()
 				ImGui::MenuItem("Padding", NULL, &opt_padding);
 				ImGui::Separator();
 
-				if (ImGui::MenuItem("Flag: NoSplit",                "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))                 { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-				if (ImGui::MenuItem("Flag: NoResize",               "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))                { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))  { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-				if (ImGui::MenuItem("Flag: AutoHideTabBar",         "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))          { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-				if (ImGui::MenuItem("Flag: PassthruCentralNode",    "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+				if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+				{
+					dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
+				}
+				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))
+				{
+					dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
+				}
+				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))
+				{
+					dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
+				}
+				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
+				{
+					dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
+				}
+				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen))
+				{
+					dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
+				}
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Close", NULL, false, &opt_isOpen != NULL))
@@ -212,9 +241,9 @@ void EditorLayer::OnImGuiRender()
 			}
 			ImGui::EndMenu();
 		}
-		
+
 		// Panel Menus
-		m_SceneHierarchyPanel.ShowMenu();	
+		m_SceneHierarchyPanel.ShowMenu();
 
 		ImGui::EndMainMenuBar();
 	}
@@ -222,19 +251,19 @@ void EditorLayer::OnImGuiRender()
 	// Panels
 	m_SceneHierarchyPanel.OnImGuiRender();
 	m_DebugConsolePanel.OnImGuiRender();
-    ImGui::End();
+	ImGui::End();
 
 	// Application Viewport of Dockspace
 	ShowGameViewPort();
 
 	ImGui::Begin("Gizmos Control");
-	ImGui::Text("FPS: %0.2f fps", 1.0f/m_FrameTime * 1000.0);
+	ImGui::Text("FPS: %0.2f fps", 1.0f / m_FrameTime * 1000.0);
 	ImGui::Text("FrameTime: %0.2f ms", m_FrameTime);
 
 	ImGui::End();
 }
 
-void EditorLayer::LoadScene(const std::string& filePath)
+void EditorLayer::LoadScene(const std::string &filePath)
 {
 	// App/Settings Configuration
 	m_Scene = SGE::CreateRef<SGE::Scene>();
@@ -250,7 +279,7 @@ void EditorLayer::LoadScene(const std::string& filePath)
 	}
 
 	m_Framebuffer = SGE::Framebuffer::CreateFramebuffer(spec);
-	m_ViewPortSize = { spec.Width, spec.Height };
+	m_ViewPortSize = {spec.Width, spec.Height};
 
 	// Set UI Panels SceneContext
 	m_SceneHierarchyPanel.SetContext(m_Scene);
@@ -260,7 +289,7 @@ void EditorLayer::LoadScene(const std::string& filePath)
 	serializer.Deserialize(filePath);
 
 	ResetScene();
-	m_ViewPortSize = { spec.Width, spec.Height };
+	m_ViewPortSize = {spec.Width, spec.Height};
 }
 
 void EditorLayer::ResetScene()
@@ -270,9 +299,9 @@ void EditorLayer::ResetScene()
 	{
 		// TODO: Add Script Serialization
 		auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
-		for (auto e: view)
+		for (auto e : view)
 		{
-			SGE::Entity entity{ e, m_Scene.get()};
+			SGE::Entity entity{e, m_Scene.get()};
 			m_SceneData.MainCamera = entity;
 			entity.AddComponent<SGE::NativeScriptComponent>().Bind<CameraController>();
 			break;
@@ -282,9 +311,9 @@ void EditorLayer::ResetScene()
 	// directional lights
 	{
 		auto view = m_Scene->Registry().view<SGE::DirectionalLightComponent>();
-		for (auto e: view)
+		for (auto e : view)
 		{
-			SGE::Entity entity{ e, m_Scene.get()};
+			SGE::Entity entity{e, m_Scene.get()};
 			m_SceneData.DirectionalLight = entity;
 			break;
 		}
@@ -294,19 +323,22 @@ void EditorLayer::ResetScene()
 	SGE::SkinnedMeshRenderer::Configure(m_SceneData);
 }
 
-bool EditorLayer::OnWindowResize(SGE::WindowResizeEvent& event)
+bool EditorLayer::OnWindowResize(SGE::WindowResizeEvent &event)
 {
 	m_Framebuffer->Resize(event.GetWidth(), event.GetHeight());
-	m_ViewPortSize = { event.GetWidth(), event.GetHeight() };
+	m_ViewPortSize = {event.GetWidth(), event.GetHeight()};
 	return false;
 }
 
 void EditorLayer::ShowFileMenuHierarchy()
 {
-	if (ImGui::MenuItem("New")) {}
-	if (ImGui::MenuItem("Open", "Ctrl+O")) {
-		std::string& filePath = SGE::FileDialogs::OpenFile("SENGINE Scene (*.selfish)\0*.selfish\0");
-		if(!filePath.empty())
+	if (ImGui::MenuItem("New"))
+	{
+	}
+	if (ImGui::MenuItem("Open", "Ctrl+O"))
+	{
+		std::string &filePath = SGE::FileDialogs::OpenFile("SENGINE Scene (*.selfish)\0*.selfish\0");
+		if (!filePath.empty())
 			LoadScene(filePath);
 	}
 	if (ImGui::BeginMenu("Open Recent"))
@@ -316,15 +348,16 @@ void EditorLayer::ShowFileMenuHierarchy()
 		ImGui::MenuItem("fish_hat.h");
 		ImGui::EndMenu();
 	}
-	if (ImGui::MenuItem("Save", "Ctrl+S")) 
+	if (ImGui::MenuItem("Save", "Ctrl+S"))
 	{
 		SGE::SceneSerializer serializer(m_Scene);
 		serializer.Serialize("assets/scenes/example.selfish");
 	}
 
-	if (ImGui::MenuItem("Save As..")) {
-		std::string& filePath = SGE::FileDialogs::SaveFile("SENGINE Scene (*.selfish)\0*.selfish\0");
-		if(!filePath.empty())
+	if (ImGui::MenuItem("Save As.."))
+	{
+		std::string &filePath = SGE::FileDialogs::SaveFile("SENGINE Scene (*.selfish)\0*.selfish\0");
+		if (!filePath.empty())
 		{
 			SGE::SceneSerializer serializer(m_Scene);
 			serializer.Serialize(filePath);
@@ -353,7 +386,7 @@ void EditorLayer::ShowFileMenuHierarchy()
 		float sz = ImGui::GetTextLineHeight();
 		for (int i = 0; i < ImGuiCol_COUNT; i++)
 		{
-			const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
+			const char *name = ImGui::GetStyleColorName((ImGuiCol)i);
 			ImVec2 p = ImGui::GetCursorScreenPos();
 			ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol)i));
 			ImGui::Dummy(ImVec2(sz, sz));
@@ -362,7 +395,7 @@ void EditorLayer::ShowFileMenuHierarchy()
 		}
 		ImGui::EndMenu();
 	}
- 
+
 	// Here we demonstrate appending again to the "Options" menu (which we already created above)
 	// Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
 	// In a real code-base using it would make senses to use this feature from very different code locations.
@@ -371,14 +404,19 @@ void EditorLayer::ShowFileMenuHierarchy()
 		static bool b = true;
 		ImGui::Checkbox("SomeOption", &b);
 		ImGui::EndMenu();
-	}	
+	}
 
 	if (ImGui::BeginMenu("Disabled", false)) // Disabled
 	{
 		IM_ASSERT(0);
 	}
-	if (ImGui::MenuItem("Checked", NULL, true)) {}
-	if (ImGui::MenuItem("Quit", "Alt+F4")) {SGE::Application::Get().ShutDown();}
+	if (ImGui::MenuItem("Checked", NULL, true))
+	{
+	}
+	if (ImGui::MenuItem("Quit", "Alt+F4"))
+	{
+		SGE::Application::Get().ShutDown();
+	}
 }
 
 void EditorLayer::ShowGameViewPort()
@@ -387,9 +425,9 @@ void EditorLayer::ShowGameViewPort()
 	static std::string runLabel = "Play";
 	if (ImGui::Button(runLabel.c_str()))
 	{
-		if(m_Scene->m_SceneState == SGE::SCENE_STATE::PAUSE)
+		if (m_Scene->m_SceneState == SGE::SCENE_STATE::PAUSE)
 		{
-			m_Scene->OnScenePlay(); 
+			m_Scene->OnScenePlay();
 			runLabel = "Pause";
 		}
 		else
@@ -400,7 +438,7 @@ void EditorLayer::ShowGameViewPort()
 	}
 	ImGui::End();
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0,0});
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 	static bool isOpen = true;
 
 	ImGui::Begin("View Port", &isOpen);
@@ -408,9 +446,9 @@ void EditorLayer::ShowGameViewPort()
 
 	auto viewPortOffset = ImGui::GetCursorPos();
 	uint32_t textureID = m_Framebuffer->GetColorAttachment();
-	ImGui::Image((void*)textureID, ImVec2(dockSize.x, dockSize.y), ImVec2(0,1), ImVec2(1,0));
-	
-	if(dockSize.x != m_Framebuffer->GetFrameBufferSpecification().Width || dockSize.y != m_Framebuffer->GetFrameBufferSpecification().Height) 
+	ImGui::Image((void *)textureID, ImVec2(dockSize.x, dockSize.y), ImVec2(0, 1), ImVec2(1, 0));
+
+	if (dockSize.x != m_Framebuffer->GetFrameBufferSpecification().Width || dockSize.y != m_Framebuffer->GetFrameBufferSpecification().Height)
 	{
 		// Rebuild framebuffer when viewport changes
 		m_Framebuffer->Resize(dockSize.x, dockSize.y);
@@ -420,12 +458,12 @@ void EditorLayer::ShowGameViewPort()
 		ImVec2 minBound = ImGui::GetWindowPos();
 		minBound.x += viewPortOffset.x;
 		minBound.y += viewPortOffset.y;
-		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
-			
+		ImVec2 maxBound = {minBound.x + windowSize.x, minBound.y + windowSize.y};
+
 		m_SceneData.SceneWidth = dockSize.x;
 		m_SceneData.SceneHeight = dockSize.y;
-		m_SceneData.ViewPortBounds[0] = glm::vec2{ minBound.x, minBound.y };
-		m_SceneData.ViewPortBounds[1] = glm::vec2{ maxBound.x, maxBound.y };
+		m_SceneData.ViewPortBounds[0] = glm::vec2{minBound.x, minBound.y};
+		m_SceneData.ViewPortBounds[1] = glm::vec2{maxBound.x, maxBound.y};
 		m_SceneData.ProjectionMatrix = glm::perspective(glm::radians(90.0f), (float)m_SceneData.SceneWidth / (float)m_SceneData.SceneHeight, 0.1f, 1000.0f);
 
 		SGE::Renderer::Configure(m_SceneData);

@@ -1,5 +1,6 @@
 #include "Logging.h"
 
-namespace SGE {
+namespace SGE
+{
 
 }

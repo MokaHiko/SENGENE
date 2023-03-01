@@ -24,8 +24,26 @@ public:
         plane.AddComponent<SGE::RigidBodyComponent>().Body.BodyTransform.Position = plane.GetComponent<SGE::TransformComponent>().Position;
         plane.AddComponent<SGE::PlaneColliderComponent>();
 
+        // Spawn Grass
+        glm::vec2 grassDim = {10.0f, 10.0f};
+        float grassSpacing = 2.0f;
+
+        for (uint32_t i = 0; i < grassDim.x; i++)
+        {
+            for (uint32_t j = 0; j < grassDim.y; j++)
+            {
+                std::string name = "Grass_";
+                name.push_back(char(i));
+                name.push_back(char(j));
+
+                SGE::Entity grass = GameObject().GetSceneHandle()->CreateEntity(name, glm::vec3(i * grassSpacing, 3, j * grassSpacing));
+                grass.GetComponent<SGE::TransformComponent>().Scale *= 2;
+                grass.AddComponent<SGE::MeshRendererComponent>(SGE::ResourceManager::CreateModel("assets/models/Billboard_grass/BillBoardGrass.obj", true));
+            }
+        }
+
         // Spawn Units
-        glm::vec2 boardDim = {1.0f, 1.0f};
+        glm::vec2 boardDim = {5, 5};
         float pieceSize = 0.5f;
 
         for (uint32_t i = 0; i < boardDim.x; i++)
@@ -39,6 +57,8 @@ public:
                 // Bind cell script
                 SGE::Entity e = GameObject().GetSceneHandle()->CreateEntity(name, glm::vec3(i * 10, 0, j * 10));
                 e.AddComponent<SGE::NativeScriptComponent>().Bind<Unit>();
+                e.AddComponent<SGE::SphereColliderComponent>();
+                e.AddComponent<SGE::RigidBodyComponent>();
 
                 m_Cells[i][j] = e;
             }
