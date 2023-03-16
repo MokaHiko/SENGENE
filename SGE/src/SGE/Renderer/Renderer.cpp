@@ -11,16 +11,8 @@ namespace SGE
 	Renderer::Renderer() {}
 	void Renderer::Init()
 	{
-		// Load Renderer's Default Settings
+		// Load Renderer's Default Resources
 		m_Shader = Shader::GetShader("assets/shaders/phong_instanced_shader");
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		glFrontFace(GL_CCW);
 	}
 
 	void Renderer::Configure(SceneData &sceneData)
@@ -46,6 +38,15 @@ namespace SGE
 
 	void Renderer::Begin()
 	{
+		// Renderer Settings
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
+
 		// Bind Camera Properties
 		auto &camera = m_SceneData.MainCamera.GetComponent<Camera3DComponent>();
 		auto &cameraPosition = m_SceneData.MainCamera.GetComponent<TransformComponent>();

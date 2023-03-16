@@ -5,21 +5,19 @@
 
 #include "Core/Application.h"
 
-namespace SGE
-{
-    class Input
-    {
-    public:
-        static bool Input::IsKeyPressed(int keycode);
+namespace SGE {
+class Input {
+public:
+  static bool IsKeyPressed(int keycode);
 
-        static bool Input::IsMouseButtonPressed(int button);
+  static bool IsMouseButtonPressed(int button);
 
-        static float Input::GetMouseX();
+  static float GetMouseX();
 
-        static float Input::GetMouseY();
+  static float GetMouseY();
 
-        static std::pair<float, float> Input::GetMousePosition();
-    };
-}
+  static std::pair<float, float> GetMousePosition();
+};
+} // namespace SGE
 
 #endif

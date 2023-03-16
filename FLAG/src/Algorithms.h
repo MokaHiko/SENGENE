@@ -28,10 +28,11 @@ namespace flg
 			return CollisionPoints{ray->Origin + (t * ray->Direction), t > 0 ? true : false};
 		}
 
-		static CollisionPoints FindRaySphereCollisionPoints(const Ray *ray, const SphereCollider *sphere)
+		static CollisionPoints FindRaySphereCollisionPoints(const Ray *ray, const SphereCollider *sphere, const Transform *sphereTransform)
 		{
-			float b = glm::dot(ray->Direction, ray->Origin - sphere->Center);
-			float c = glm::dot(ray->Origin - sphere->Center, ray->Origin - sphere->Center) - (sphere->Radius * sphere->Radius);
+			glm::vec3 sphereWorldCenter = sphereTransform->Position + sphere->Center;
+			float b = glm::dot(ray->Direction, ray->Origin - sphereWorldCenter);
+			float c = glm::dot(ray->Origin - sphereWorldCenter, ray->Origin - sphereWorldCenter) - (sphere->Radius * sphere->Radius);
 
 			float discriminant = b * b - c;
 
@@ -56,6 +57,16 @@ namespace flg
 			const SphereCollider *a, const Transform *ta,
 			const SphereCollider *b, const Transform *tb)
 		{
+			glm::vec3 difference = (ta->Position + a->Center) - (tb->Position + b->Center);
+			float differenceMagnitude = glm::length(difference);
+			float sumRadius = a->Radius + b->Radius;
+
+			if (differenceMagnitude < sumRadius)
+			{
+				// TODO: Add Point of Collision
+				return CollisionPoints{glm::vec3(), true};
+			}
+
 			return {};
 		}
 

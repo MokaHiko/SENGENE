@@ -4,6 +4,8 @@
 #include "Systems.h"
 
 #include "Core/TimeStep.h"
+#include <functional>
+
 namespace SGE
 {
 	Scene::Scene(const std::string &sceneName)
@@ -26,7 +28,7 @@ namespace SGE
 			{
 				auto &nsc = view.get<NativeScriptComponent>(entity);
 
-				// instantiate script if not yet made
+				// register and instantiate script if not yet made
 				if (!nsc.ScriptInstance)
 				{
 					nsc.ScriptInstance = nsc.InstantiateScript();
@@ -42,37 +44,11 @@ namespace SGE
 		for (auto e : group)
 		{
 			Entity entity = {e, this};
-
-			// Get Assigned Transform
-			auto &transform = entity.GetComponent<TransformComponent>();
-			auto &rb = entity.GetComponent<RigidBodyComponent>();
-
-			// Assign Owner Entity ID & Transform Position To Physics Body
-			rb.Body.SetEntityOwnerID(entity.Id());
-			rb.Body.BodyTransform.Position = transform.Position;
-			rb.Body.BodyTransform.Rotation = transform.Rotation;
-
-			// Calculate Values for Colliders
-			if (entity.HasComponent<PlaneColliderComponent>())
-			{
-				auto &collider = entity.GetComponent<PlaneColliderComponent>();
-				// TODO: calculate normal
-				collider.planeCollider.Normal = {0.0, 1.0f, 0.0};
-
-				rb.Body.BodyCollider = &collider.planeCollider;
-			}
-
-			if (entity.HasComponent<SphereColliderComponent>())
-			{
-				auto &collider = entity.GetComponent<SphereColliderComponent>();
-				collider.sphereCollider.Center = transform.Position;
-
-				rb.Body.BodyCollider = &collider.sphereCollider;
-			}
-
-			// Add Body to Physics System
-			flg::PhysicsWorld::AddBody(&rb.Body);
+			RegisterToPhysicsWorld(entity);
 		}
+
+		// Bind OnCollisionEnterCallback
+		flg::PhysicsWorld::SetOnCollisionEnterCallBack(std::bind(&Scene::CollisionEnterCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 		m_SceneState = SCENE_STATE::PLAY;
 	}
@@ -122,6 +98,11 @@ namespace SGE
 				{
 					auto &transform = group.get<TransformComponent>(entity);
 					auto &rb = group.get<RigidBodyComponent>(entity);
+
+					// Register all post play created entities
+					if (!rb.Registered)
+						RegisterToPhysicsWorld({entity, this});
+
 					transform.Position = rb.Body.GetPosition();
 				}
 			}
@@ -167,4 +148,54 @@ namespace SGE
 			}
 		}
 	}
+
+	void Scene::RegisterToPhysicsWorld(Entity e)
+	{
+		// Get Assigned Transform
+		auto &transform = e.GetComponent<TransformComponent>();
+		auto &rb = e.GetComponent<RigidBodyComponent>();
+
+		// Assign Owner Entity ID & Transform Position To Physics Body
+		rb.Body.SetEntityOwnerID(e.Id());
+		rb.Body.BodyTransform.Position = transform.Position;
+		rb.Body.BodyTransform.Rotation = transform.Rotation;
+		rb.Body.BodyTransform.Scale = transform.Scale;
+
+		// Calculate Values for Colliders
+		if (e.HasComponent<PlaneColliderComponent>())
+		{
+			auto &collider = e.GetComponent<PlaneColliderComponent>();
+
+			// TODO: calculate normal for any orientation
+			collider.planeCollider.Normal = {0.0, 1.0f, 0.0};
+
+			rb.Body.BodyCollider = &collider.planeCollider;
+		}
+
+		if (e.HasComponent<SphereColliderComponent>())
+		{
+			auto &collider = e.GetComponent<SphereColliderComponent>();
+
+			rb.Body.BodyCollider = &collider.sphereCollider;
+		}
+
+		// Register Rigid Body and Add to Physics System
+		rb.Registered = true;
+		flg::PhysicsWorld::AddBody(&rb.Body);
+	}
+
+	void Scene::CollisionEnterCallback(flg::CollisionPoints &col, uint32_t entityA, uint32_t entityB)
+	{
+		Entity e1{entityA, this};
+		Entity e2{entityB, this};
+
+		if (e1.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e2))
+			return;
+
+		if (e2.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e1))
+			return;
+	};
+	void Scene::CollisionExitCallback(flg::CollisionPoints &col, uint32_t entityA, uint32_t entityB){
+
+	};
 }

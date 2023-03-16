@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <functional>
 
 #include "Body.h"
 #include "Collider.h"
@@ -29,6 +30,10 @@ namespace flg
         static void RemoveBody(Body *body);
         static void Clear();
 
+        using CollisionCallbackFn = std::function<void(flg::CollisionPoints &col, uint32_t entityA, uint32_t entityB)>;
+        static void SetOnCollisionEnterCallBack(CollisionCallbackFn onEnterFn);
+        static void SetOnCollisionExitCallBack(CollisionCallbackFn onExit);
+
     public:
         struct Raycasthit
         {
@@ -39,6 +44,8 @@ namespace flg
         };
 
         static Raycasthit Raycast(const Ray *ray, float distance = 1000.0f);
+        static std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> m_CollisionEnterCallback;
+        static std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> m_CollisionExitCallback;
 
     private:
         PhysicsWorld() {}

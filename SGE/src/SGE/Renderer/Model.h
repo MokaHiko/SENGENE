@@ -5,16 +5,17 @@
 
 #include <glm/glm.hpp>
 
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>     // Post processing flags
+#include <assimp/Importer.hpp>  // C++ importer interface
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
 
 #include "Core/Core.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/Shader.h"
 
-namespace SGE {
+namespace SGE
+{
     class Model
     {
     private:
@@ -27,40 +28,43 @@ namespace SGE {
 
             NUM_BUFFERS = 4
         };
+
     public:
-        Model(const std::string& modelPath, bool flipUVS = false);
+        Model(const std::string &modelPath, bool flipUVS = false, uint32_t maxInstances = 1000);
         ~Model();
 
-        static Ref<Model> CreateModel(const std::string& modelPath, bool flipUVS = false);
+        static Ref<Model> CreateModel(const std::string &modelPath, bool flipUVS = false);
 
         // - Rendering
-        void AddInstance(const glm::vec3& position = glm::vec3{1.0}, const glm::vec3& rotation = glm::vec3{0.0f}, const glm::vec3& scale = glm::vec3{1.0f});
-        void Render(const Ref<Shader> shader);
-	    void DrawMesh(const Mesh& mesh);
+        void AddInstance(const glm::vec3 &position = glm::vec3{1.0}, const glm::vec3 &rotation = glm::vec3{0.0f}, const glm::vec3 &scale = glm::vec3{1.0f});
+        void Render(const Ref<Shader> shader, bool clearInstances = true);
+        void DrawMesh(const Mesh &mesh);
         void Clear();
 
         // - Panel Interface
-        const std::vector<Ref<Material>>& GetMaterials() const {return m_Materials;}
-        uint32_t GetNMaterials() const {return static_cast<uint32_t>(m_Materials.size());}
-        uint32_t GetNMeshes() const {return static_cast<uint32_t>(m_Meshes.size());}
+        const std::vector<Ref<Material>> &GetMaterials() const { return m_Materials; }
+        uint32_t GetNMaterials() const { return static_cast<uint32_t>(m_Materials.size()); }
+        uint32_t GetNMeshes() const { return static_cast<uint32_t>(m_Meshes.size()); }
+
     private:
         // - Model Loading
-        void LoadModel(const std::string& fileName, bool flipUVS);
-        bool ProcessScene(const aiScene* scene, const std::string& fileName);
-        bool ProcessMaterials(const aiScene* scene, const std::string& fileName);
-        void ProcessMesh(const aiMesh* pMesh);
-	    void ProcessNodeHierarchy(const aiNode* pNode, const glm::mat4& parentTransform, float timeInTicks);
+        void LoadModel(const std::string &fileName, bool flipUVS);
+        bool ProcessScene(const aiScene *scene, const std::string &fileName);
+        bool ProcessMaterials(const aiScene *scene, const std::string &fileName);
+        void ProcessMesh(const aiMesh *pMesh);
+        void ProcessNodeHierarchy(const aiNode *pNode, const glm::mat4 &parentTransform, float timeInTicks);
 
         // - Buffers
         void PopulateBuffers();
+
     private:
         // Assimp Structures
         Assimp::Importer m_Importer{};
-        const aiScene* m_aiScene = nullptr;
+        const aiScene *m_aiScene = nullptr;
 
         // Model Structures
         std::vector<Mesh> m_Meshes{};
-        std::vector<Ref<Material>>  m_Materials{};
+        std::vector<Ref<Material>> m_Materials{};
 
         // Local Model Vertex Buffers (each mesh)
         std::vector<glm::vec3> m_Positions{};
@@ -75,6 +79,7 @@ namespace SGE {
 
         // GPU Buffer Handles
         std::vector<uint32_t> m_Buffers{};
+
     private:
         // Renderer Config
         uint32_t m_MaxInstances = 1000;

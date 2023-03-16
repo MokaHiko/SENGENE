@@ -14,7 +14,7 @@ namespace flg
 		const Transform *colliderTransform) const
 	{
 		// Double dispatch to resolve both collider types.
-		// TODO: Remove Comment: i.e collider->specific_collider->TestCollision(transform, PlaneCollider, transform);
+		// i.e collider->specific_collider->TestCollision(transform, PlaneCollider, PlaneTransform);
 		return collider->TestCollision(colliderTransform, this, transform);
 	};
 
@@ -45,7 +45,7 @@ namespace flg
 	SphereCollider::SphereCollider(glm::vec3 center, float radius)
 		: Center(center), Radius(radius) {}
 	SphereCollider::SphereCollider()
-		: Center(0.0f), Radius(0.0f) {}
+		: Center(0.0f), Radius(1.0f) {}
 
 	CollisionPoints SphereCollider::TestCollision(
 		const Transform *transform,
@@ -60,7 +60,7 @@ namespace flg
 		const SphereCollider *collider,
 		const Transform *colliderTransform) const
 	{
-		return CollisionPoints{};
+		return algo::FindSphereSphereColissionPoints(this, transform, collider, colliderTransform);
 	};
 
 	CollisionPoints SphereCollider::TestCollision(
@@ -76,7 +76,7 @@ namespace flg
 		const Ray *ray,
 		const Transform *rayTransform) const
 	{
-		return algo::FindRaySphereCollisionPoints(ray, this);
+		return algo::FindRaySphereCollisionPoints(ray, this, transform);
 	};
 
 	Ray::Ray(const glm::vec3 origin, const glm::vec3 direction)

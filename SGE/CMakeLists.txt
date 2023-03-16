@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.0.0)
 
 # Application Name and Platform
-set(CMAKE_GENERATOR_PLATFORM x64)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 project(SENGINE VERSION 0.1.0)
 
 #Windows Sources
 file(GLOB HEADERS "src/SGE/*.h"   "src/SGE/Core/*.h"   "src/SGE/Platform/Windows/*.h"    "src/SGE/Core/*.h"        "src/SGE/Events/*.h"    "src/SGE/Scene/*.h" "src/SGE/ImGui/*.h" "src/SGE/Utils/*.h")
-file(GLOB SOURCES "src/SGE/*.cpp" "src/SGE/Core/*.cpp" "src/SGE/Platform/Windows/*.cpp"  "src/SGE/Renderer/*.cpp"  "src/SGE/Renderer/SkinnedMeshRenderer/*.cpp" "src/SGE/Events/*.cpp"  "src/SGE/Scene/*.cpp" "src/SGE/ImGui/*.cpp" "src/SGE/Utils/*.cpp")
+file(GLOB SOURCES "src/SGE/*.cpp" "src/SGE/Core/*.cpp" "src/SGE/Platform/Windows/*.cpp"  "src/SGE/Renderer/*.cpp"  "src/SGE/Renderer/SkinnedMeshRenderer/*.cpp" "src/SGE/Renderer/GrassRenderer/*.cpp" "src/SGE/Events/*.cpp"  "src/SGE/Scene/*.cpp" "src/SGE/ImGui/*.cpp" "src/SGE/Utils/*.cpp")
 
 add_library(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/sgepch.h)

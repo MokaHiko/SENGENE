@@ -1,6 +1,15 @@
 # Builds
-[Bb]uild
+.build
+build/
 .vscode
+.cache
+
+# Resources 
+*.fbx
+*.obj
+*.png
+*.mtl
+*.vox
 
 # 3rd Party Docs
 *.html

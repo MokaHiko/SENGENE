@@ -16,8 +16,8 @@ static const int TRANSFORM_MATRIX_LOCATION = 5;
 
 namespace SGE
 {
-	Model::Model(const std::string &modelPath, bool flipUVS)
-		: m_RendererID(0), m_aiScene(nullptr)
+	Model::Model(const std::string &modelPath, bool flipUVS, uint32_t maxInstances)
+		: m_RendererID(0), m_aiScene(nullptr), m_MaxInstances(maxInstances)
 	{
 		// Generate Model rendererID
 		glGenVertexArrays(1, &m_RendererID);
@@ -34,6 +34,9 @@ namespace SGE
 
 	Model::~Model()
 	{
+		// Clear Local Model Data
+		Clear();
+
 		// delete m_aiScene; TODO: Clean Scene
 		for (auto buffer : m_Buffers)
 			glDeleteBuffers(1, &buffer);
@@ -89,7 +92,7 @@ namespace SGE
 		glBindVertexArray(0);
 	}
 
-	void Model::Render(const Ref<Shader> shader)
+	void Model::Render(const Ref<Shader> shader, bool clearInstances)
 	{
 		glBindVertexArray(m_RendererID);
 		for (uint32_t i = 0; i < m_Meshes.size(); i++)
@@ -128,7 +131,8 @@ namespace SGE
 				shader->SetBool("u_Material.HasSpecularTexture", false);
 		}
 
-		m_NumInstances = 0;
+		if (clearInstances)
+			m_NumInstances = 0;
 	}
 
 	void Model::DrawMesh(const Mesh &mesh)

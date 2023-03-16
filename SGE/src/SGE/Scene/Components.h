@@ -12,12 +12,13 @@
 #include "Events/Event.h"
 #include "Physics.h"
 
-namespace SGE {
+namespace SGE
+{
    struct TransformComponent
    {
-        glm::vec3 Position = {0.0f, 0.0f, 0.0f};
-        glm::vec3 Rotation = {0.0f, 0.0f, 0.0f};
-        glm::vec3 Scale    = {1.0f, 1.0f, 1.0f};
+      glm::vec3 Position = {0.0f, 0.0f, 0.0f};
+      glm::vec3 Rotation = {0.0f, 0.0f, 0.0f};
+      glm::vec3 Scale = {1.0f, 1.0f, 1.0f};
    };
 
    struct MeshRendererComponent
@@ -25,7 +26,7 @@ namespace SGE {
       Ref<Model> Model;
       bool FlipUVS;
       MeshRendererComponent(Ref<SGE::Model> model, bool flipUVS = false)
-      :Model(model), FlipUVS{flipUVS}{}
+          : Model(model), FlipUVS{flipUVS} {}
    };
 
    struct SkinnedMeshRendererComponent
@@ -33,7 +34,7 @@ namespace SGE {
       Ref<AnimatedModel> AnimatedModel;
       bool FlipUVS;
       SkinnedMeshRendererComponent(Ref<SGE::AnimatedModel> model, bool flipUVS = false)
-      :AnimatedModel(model), FlipUVS{flipUVS}{}
+          : AnimatedModel(model), FlipUVS{flipUVS} {}
    };
 
    struct PointLightComponent
@@ -59,8 +60,8 @@ namespace SGE {
       static const uint32_t MAX_TAG_SIZE = 128; // in bytes
 
       std::string Tag;
-      TagComponent(const std::string& name)
-         :Tag(name) {}
+      TagComponent(const std::string &name)
+          : Tag(name) {}
    };
 
    struct Camera3DComponent
@@ -69,36 +70,38 @@ namespace SGE {
       Camera3D camera{};
 
       Camera3DComponent(bool isActive = true)
-         :IsActive(isActive){}
+          : IsActive(isActive) {}
    };
 
    struct NativeScriptComponent
    {
-      ScriptableEntity* ScriptInstance = nullptr;
+      ScriptableEntity *ScriptInstance = nullptr;
 
-      ScriptableEntity*(*InstantiateScript)() = nullptr;
-      void(*DestroyScript)(NativeScriptComponent*) = nullptr;
+      ScriptableEntity *(*InstantiateScript)() = nullptr;
+      void (*DestroyScript)(NativeScriptComponent *) = nullptr;
 
-      template<typename T>
+      template <typename T>
       void Bind()
       {
-         InstantiateScript = [](){return static_cast<ScriptableEntity*>(new T());};
-         DestroyScript = [](NativeScriptComponent* nsc){delete nsc->ScriptInstance; nsc->ScriptInstance = nullptr;};
+         InstantiateScript = []()
+         { return static_cast<ScriptableEntity *>(new T()); };
+         DestroyScript = [](NativeScriptComponent *nsc)
+         {delete nsc->ScriptInstance; nsc->ScriptInstance = nullptr; };
       }
    };
 
-   template<typename T>
+   template <typename T>
    struct EventWatcherComponent
    {
-      std::function<void(T&)> EntityCallBack;
+      std::function<void(T &)> EntityCallBack;
 
       EventWatcherComponent() = default;
 
-      void Watch(std::function<void(T&)> callback)
+      void Watch(std::function<void(T &)> callback)
       {
-          bool isEvent = std::is_base_of<Event, T>::value;
-          assert(isEvent);
-          EntityCallBack = callback;
+         bool isEvent = std::is_base_of<Event, T>::value;
+         assert(isEvent);
+         EntityCallBack = callback;
       }
    };
 
@@ -106,9 +109,10 @@ namespace SGE {
    {
       flg::Body Body;
       bool UseGravity = true;
+      bool Registered = false;
 
       RigidBodyComponent() = default;
-      RigidBodyComponent(const RigidBodyComponent& other) = default;
+      RigidBodyComponent(const RigidBodyComponent &other) = default;
    };
 
    struct SphereColliderComponent
@@ -116,7 +120,7 @@ namespace SGE {
       flg::SphereCollider sphereCollider;
 
       SphereColliderComponent() = default;
-      SphereColliderComponent(const SphereColliderComponent& other) = default;
+      SphereColliderComponent(const SphereColliderComponent &other) = default;
    };
 
    struct PlaneColliderComponent
@@ -124,7 +128,7 @@ namespace SGE {
       flg::PlaneCollider planeCollider;
 
       PlaneColliderComponent() = default;
-      PlaneColliderComponent(const PlaneColliderComponent& other) = default;
+      PlaneColliderComponent(const PlaneColliderComponent &other) = default;
    };
 }
 

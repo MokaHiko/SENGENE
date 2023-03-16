@@ -2,8 +2,13 @@
 
 namespace flg
 {
+	// Bodies
 	std::vector<Body *> PhysicsWorld::m_Bodies{};
 	PhysicsWorldProperties PhysicsWorld::m_Properties{};
+
+	// Default Callbacks
+	std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> PhysicsWorld::m_CollisionEnterCallback = [](CollisionPoints, uint32_t, uint32_t) {};
+	std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> PhysicsWorld::m_CollisionExitCallback = [](CollisionPoints, uint32_t, uint32_t) {};
 
 	PhysicsWorld::~PhysicsWorld()
 	{
@@ -16,9 +21,20 @@ namespace flg
 		{
 			if (body->BodyCollider)
 			{
-				// TODO: Check Collisions
+				for (Body *body2 : m_Bodies)
+				{
+					if (body == body2)
+						continue;
 
-				// Update Collider Positions
+					auto collisionPoints = body->BodyCollider->TestCollision(&body->BodyTransform, body2->BodyCollider, &body2->BodyTransform);
+					if (collisionPoints.DidCollide)
+					{
+						m_CollisionEnterCallback(collisionPoints, body->GetEntityOwnerID(), body2->GetEntityOwnerID());
+						// TODO: Set WithinCollisionFlag to true
+					}
+				}
+
+				// TODO: Resolve Positions
 			}
 
 			if (body->Type != BodyType::Static)
@@ -39,8 +55,7 @@ namespace flg
 		for (Body *body : m_Bodies)
 		{
 			if (body->BodyCollider != nullptr)
-			{
-				// Check Collision
+			{ // Check Collision
 				Transform *t = &body->BodyTransform;
 				CollisionPoints col = body->BodyCollider->TestCollision(t, ray, nullptr);
 
@@ -48,6 +63,8 @@ namespace flg
 				{
 					hit.CollisionPoint = col.A;
 					hit.body = body;
+
+					// TODO: CHANGE FROM FIRST HIT TO ALL HIT
 					break;
 				}
 			}
@@ -69,6 +86,16 @@ namespace flg
 	void PhysicsWorld::Clear()
 	{
 		m_Bodies.clear();
+	}
+
+	void PhysicsWorld::SetOnCollisionEnterCallBack(CollisionCallbackFn onEnterFn)
+	{
+		m_CollisionEnterCallback = onEnterFn;
+	}
+
+	void PhysicsWorld::SetOnCollisionExitCallBack(CollisionCallbackFn onExit)
+	{
+		m_CollisionExitCallback = onExit;
 	}
 
 }

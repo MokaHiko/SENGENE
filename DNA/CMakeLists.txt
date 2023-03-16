@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
+
+set(CMAKE_CXX_STANDARD 17)
 project(DNA VERSION 0.1.0)
 
 file(GLOB SOURCES "src/*.cpp" "src/Scripts/*.cpp" "src/Scripts/*.h" "src/Panels/*.cpp")
@@ -19,7 +21,7 @@ add_custom_target(
     copy_resources_vscode ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${PROJECT_SOURCE_DIR}/assets
-    ${PROJECT_BINARY_DIR}/Debug/assets
+    ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/assets
     COMMENT "Copying Resources Into Build folder"
 )
 

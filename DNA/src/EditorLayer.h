@@ -13,7 +13,7 @@
 
 #include "Scene/SceneSerializer.h"
 
-class EditorLayer: public SGE::Layer
+class EditorLayer : public SGE::Layer
 {
 public:
     EditorLayer() = default;
@@ -21,25 +21,28 @@ public:
 
     virtual void OnAttach() override;
     virtual void OnDetach() override;
-    virtual void OnEvent(SGE::Event& event) override;
+    virtual void OnEvent(SGE::Event &event) override;
 
     virtual void OnUpdate(SGE::TimeStep ts) override;
     virtual void OnImGuiRender() override;
 
-    glm::vec2 m_ViewPortSize = { 0.0f, 0.0f };
+    glm::vec2 m_ViewPortSize = {0.0f, 0.0f};
 
     // Editor Specific Inputs
     static glm::vec2 editorMouseInput;
+
 private:
-    void LoadScene(const std::string& filePath);
+    void LoadScene(const std::string &filePath);
     void ResetScene();
-    bool OnWindowResize(SGE::WindowResizeEvent& event);
+    bool OnWindowResize(SGE::WindowResizeEvent &event);
+
 private:
     SGE::SceneHierarchyPanel m_SceneHierarchyPanel;
     SGE::DebugConsolePanel m_DebugConsolePanel;
-    
+
     void ShowFileMenuHierarchy();
     void ShowGameViewPort();
+
 private:
     SGE::Ref<SGE::Framebuffer> m_Framebuffer;
     SGE::Ref<SGE::Scene> m_Scene;
@@ -48,9 +51,18 @@ private:
     SGE::Ref<SGE::Texture2D> m_SampleTexture;
 
     SGE::Ref<SGE::Model> m_Model;
+
 private:
     // - Widgets Data
     float m_FrameTime = 0;
+
+    // Editor State
+    enum class EditorState
+    {
+        None,
+        GameRunning,
+        GamePaused,
+    } m_EditorState = EditorState::GamePaused;
 };
 
 #endif

@@ -2,37 +2,41 @@
 #define SCRIPTABLEENTITY_H
 
 #pragma once
-#include "Entity.h"
 #include "Core/TimeStep.h"
+#include "Entity.h"
+#include "Physics.h"
 
 namespace SGE {
-    class ScriptableEntity
-    {
-    public:
-        virtual ~ScriptableEntity() {};
+class ScriptableEntity {
+public:
+  virtual ~ScriptableEntity() { std::cout << "nice" << std::endl; };
 
-        template<typename T>
-        T& GetComponent()
-        {
-            return m_Entity.GetComponent<T>();
-        }
+  template <typename T> T &GetComponent() { return m_Entity.GetComponent<T>(); }
 
-        template<typename T, typename ... Args>
-        T& AddComponent(Args&& ... args)
-        {
-            return m_Entity.AddComponent<T>(std::foward<Args>(args)...);
-        }
+  template <typename T, typename... Args> T &AddComponent(Args &&...args) {
+    return m_Entity.AddComponent<T>(std::forward<Args>(args)...);
+  }
 
-        virtual void OnCreate(){};
-        virtual void OnStart(){};
-        virtual void OnDestroy(){};
-        virtual void OnUpdate(TimeStep timestep){};
+  template <typename T> T *GetNativeScriptComponent() {
+    return m_Entity.GetNativeScriptComponent<T>();
+  }
 
-        Entity GameObject() {return m_Entity;};
-    private:
-        Entity m_Entity{};
-        friend class Scene;
-    };
-}
+  virtual void OnCreate(){};
+  virtual void OnStart(){};
+  virtual void OnDestroy(){};
+  virtual void OnUpdate(TimeStep timestep){};
+
+  virtual bool OnCollisionEnter(flg::CollisionPoints &colPoints,
+                                Entity colEntity) {
+    return false;
+  };
+
+  Entity GameObject() { return m_Entity; };
+
+private:
+  Entity m_Entity{};
+  friend class Scene;
+};
+} // namespace SGE
 
 #endif
