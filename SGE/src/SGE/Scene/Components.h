@@ -113,6 +113,18 @@ namespace SGE
 
       RigidBodyComponent() = default;
       RigidBodyComponent(const RigidBodyComponent &other) = default;
+
+      void AddForce(const glm::vec3 &force)
+      {
+         Body.Force += force;
+      }
+
+      void AddImpulse(const glm::vec3 &force)
+      {
+         Body.Force = glm::vec3{0.0f};
+         Body.Velocity = glm::vec3{0.0f};
+         Body.Force += force;
+      }
    };
 
    struct SphereColliderComponent

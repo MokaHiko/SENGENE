@@ -18,22 +18,30 @@
 // Define Inputs relative to viewport in edit mode
 glm::vec2 EditorLayer::editorMouseInput = glm::vec2{0.0f};
 
-namespace SGE {
+namespace SGE
+{
 #ifndef SGE_RELEASE_MODE
-float Input::GetMouseX() { return EditorLayer::editorMouseInput.x; }
-float Input::GetMouseY() { return EditorLayer::editorMouseInput.y; }
-std::pair<float, float> Input::GetMousePosition() {
-  return std::pair<float, float>(EditorLayer::editorMouseInput.x,
-                                 EditorLayer::editorMouseInput.y);
-}
+  float Input::GetMouseX()
+  {
+    return EditorLayer::editorMouseInput.x;
+  }
+  float Input::GetMouseY() { return EditorLayer::editorMouseInput.y; }
+  std::pair<float, float> Input::GetMousePosition()
+  {
+    return std::pair<float, float>(EditorLayer::editorMouseInput.x,
+                                   EditorLayer::editorMouseInput.y);
+  }
 #endif
 } // namespace SGE
 
 EditorLayer::~EditorLayer() {}
 
-void EditorLayer::OnAttach() {
+void EditorLayer::OnAttach()
+{
   // Configure App Settings
-  { SGE::Application::Get().GetWindow().SetWindowTitle("DNA Editor"); }
+  {
+    SGE::Application::Get().GetWindow().SetWindowTitle("DNA Editor");
+  }
 
   // Load Engine Resources
   {
@@ -65,81 +73,34 @@ void EditorLayer::OnAttach() {
     // Load Resources
     SGE::Model::CreateModel("assets/models/Mecha/Mecha.fbx");
     m_Scene->CreateEntity("MainBoard").AddNativeScriptComponent<Board>();
-
-    // Game Parameters
-
-    // Spawn Map
-    SGE::Entity plane = m_Scene->CreateEntity("Plane");
-    plane.AddComponent<SGE::MeshRendererComponent>(
-        SGE::ResourceManager::GetModel("assets/models/cube/cube.obj"));
-    plane.GetComponent<SGE::TransformComponent>().Scale = {100.0f, 0.0, 100.0f};
-    plane.AddComponent<SGE::RigidBodyComponent>().Body.BodyTransform.Position =
-        plane.GetComponent<SGE::TransformComponent>().Position;
-    plane.AddComponent<SGE::PlaneColliderComponent>();
-
-    // Spawn Grass
-    glm::vec2 grassDim = {300.0f, 300.0f};
-    float grassScale = 4.0f;
-    float grassSpacing = 0.25f;
-
-    OpenSimplexNoise::Noise noise;
-
-    for (uint32_t i = 0; i < grassDim.x; i++) {
-      for (uint32_t j = 0; j < grassDim.y; j++) {
-        glm::vec3 scale = glm::vec3(grassScale);
-        scale.y = static_cast<float>(noise.eval(i, j)) * 1.0f;
-        glm::vec3 position = glm::vec3(i * grassSpacing, 0, j * grassSpacing);
-        position.x +=
-            (float)(rand() % (int)grassScale) * grassSpacing * scale.y * 0.5f;
-        position.z +=
-            (float)(rand() % (int)grassScale) * grassSpacing * scale.y * 0.5f;
-        glm::vec3 rotation = glm::vec3(-90.0f, 0.0f, 0.0f);
-        SGE::GrassRenderer::AddInstance(position, rotation, scale);
-      }
-    }
-
-    // Spawn Units
-    glm::vec2 boardDim = {2.0f, 1.0f};
-    float unitSpacing = 10.0f;
-
-    for (uint32_t i = 0; i < boardDim.x; i++) {
-      for (uint32_t j = 0; j < boardDim.y; j++) {
-        std::stringstream s;
-        s << "Unit_" << i << '_' << j;
-
-        SGE::Entity e = m_Scene->CreateEntity(
-            s.str(), glm::vec3(i * unitSpacing, 1.0f, j * unitSpacing));
-        e.AddNativeScriptComponent<Unit>();
-        e.AddComponent<SGE::MeshRendererComponent>(SGE::Model::CreateModel(
-            "assets/models/red_cube/redcube.obj", false));
-        e.AddComponent<SGE::RigidBodyComponent>();
-        e.AddComponent<SGE::SphereColliderComponent>().sphereCollider.Radius =
-            1.0f;
-      }
-    }
   }
 }
 
 void EditorLayer::OnDetach() {}
 
-void EditorLayer::OnEvent(SGE::Event &event) {
-  if (event.GetEventType() == SGE::EventType::MouseMove) {
+void EditorLayer::OnEvent(SGE::Event &event)
+{
+  if (event.GetEventType() == SGE::EventType::MouseMove)
+  {
     auto view = m_Scene->Registry()
                     .view<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>();
-    for (auto entity : view) {
+    for (auto entity : view)
+    {
       auto &eventWatcher =
           view.get<SGE::EventWatcherComponent<SGE::MouseMoveEvent>>(entity);
       eventWatcher.EntityCallBack(*(SGE::MouseMoveEvent *)&event);
     }
   }
-  if (event.GetEventType() == SGE::EventType::WindowResize) {
+  if (event.GetEventType() == SGE::EventType::WindowResize)
+  {
     SGE::EventDispatcher dispatcher(event);
     dispatcher.Dispatch<SGE::WindowResizeEvent>(
         std::bind(&EditorLayer::OnWindowResize, this, std::placeholders::_1));
   }
 }
 
-void EditorLayer::OnUpdate(SGE::TimeStep ts) {
+void EditorLayer::OnUpdate(SGE::TimeStep ts)
+{
   m_Framebuffer->Bind();
 
   // --------- Scene Update ---------
@@ -173,8 +134,10 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts) {
   // --------- Renderering ---------
 
   // --------- Debug Widgets ---------
-  if (m_EditorState == EditorState::GamePaused) {
-    if (SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
+  if (m_EditorState == EditorState::GamePaused)
+  {
+    if (SGE::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1))
+    {
       SGE::Entity camera = SGE::Renderer::GetSceneData().MainCamera;
       CameraController *cameraController =
           camera.GetNativeScriptComponent<CameraController>();
@@ -185,7 +148,8 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts) {
       auto ray = flg::Ray(
           camera.GetComponent<SGE::TransformComponent>().Position, rayDir);
       auto hit = flg::PhysicsWorld::Raycast(&ray, 10000);
-      if (hit.DidHit()) {
+      if (hit.DidHit())
+      {
         glm::vec3 colPoint = hit.CollisionPoint;
         SGE::Entity hitEntity = {hit.body->GetEntityOwnerID(), m_Scene.get()};
 
@@ -199,11 +163,11 @@ void EditorLayer::OnUpdate(SGE::TimeStep ts) {
   m_FrameTime = ts.GetMilliSeconds();
 
   // --------- Debug Widghets ---------
-
   m_Framebuffer->Unbind();
 }
 
-void EditorLayer::OnImGuiRender() {
+void EditorLayer::OnImGuiRender()
+{
   static bool opt_isOpen = true;
   static bool opt_fullscreen = true;
   static bool opt_padding = false;
@@ -214,7 +178,8 @@ void EditorLayer::OnImGuiRender() {
   // targets within each others.
   ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-  if (opt_fullscreen) {
+  if (opt_fullscreen)
+  {
     const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
@@ -225,7 +190,9 @@ void EditorLayer::OnImGuiRender() {
                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
     window_flags |=
         ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-  } else {
+  }
+  else
+  {
     dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
   }
 
@@ -243,36 +210,49 @@ void EditorLayer::OnImGuiRender() {
 
   // Submit the DockSpace
   ImGuiIO &io = ImGui::GetIO();
-  if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+  if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+  {
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-  } else {
+  }
+  else
+  {
     std::cout << "Docking Disabled" << std::endl;
   }
 
   // Menus
-  if (ImGui::BeginMainMenuBar()) {
+  if (ImGui::BeginMainMenuBar())
+  {
     // Application Menus
-    if (ImGui::BeginMenu("File")) {
+    if (ImGui::BeginMenu("File"))
+    {
       ShowFileMenuHierarchy();
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("Edit")) {
-      if (ImGui::MenuItem("Undo", "CTRL+Z")) {
+    if (ImGui::BeginMenu("Edit"))
+    {
+      if (ImGui::MenuItem("Undo", "CTRL+Z"))
+      {
       }
-      if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
+      if (ImGui::MenuItem("Redo", "CTRL+Y", false, false))
+      {
       } // Disabled item
       ImGui::Separator();
-      if (ImGui::MenuItem("Cut", "CTRL+X")) {
+      if (ImGui::MenuItem("Cut", "CTRL+X"))
+      {
       }
-      if (ImGui::MenuItem("Copy", "CTRL+C")) {
+      if (ImGui::MenuItem("Copy", "CTRL+C"))
+      {
       }
-      if (ImGui::MenuItem("Paste", "CTRL+V")) {
+      if (ImGui::MenuItem("Paste", "CTRL+V"))
+      {
       }
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("Window")) {
-      if (ImGui::BeginMenu("Options")) {
+    if (ImGui::BeginMenu("Window"))
+    {
+      if (ImGui::BeginMenu("Options"))
+      {
         // Disabling fullscreen would allow the window to be moved to the front
         // of other windows, which we can't undo at the moment without finer
         // window depth/z control.
@@ -282,28 +262,33 @@ void EditorLayer::OnImGuiRender() {
 
         if (ImGui::MenuItem("Flag: NoSplit", "",
                             (dockspace_flags & ImGuiDockNodeFlags_NoSplit) !=
-                                0)) {
+                                0))
+        {
           dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
         }
         if (ImGui::MenuItem("Flag: NoResize", "",
                             (dockspace_flags & ImGuiDockNodeFlags_NoResize) !=
-                                0)) {
+                                0))
+        {
           dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
         }
         if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "",
                             (dockspace_flags &
-                             ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) {
+                             ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))
+        {
           dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
         }
         if (ImGui::MenuItem(
                 "Flag: AutoHideTabBar", "",
-                (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) {
+                (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
+        {
           dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
         }
         if (ImGui::MenuItem(
                 "Flag: PassthruCentralNode", "",
                 (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0,
-                opt_fullscreen)) {
+                opt_fullscreen))
+        {
           dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
         }
         ImGui::Separator();
@@ -339,14 +324,18 @@ void EditorLayer::OnImGuiRender() {
   ImGui::End();
 }
 
-void EditorLayer::LoadScene(const std::string &filePath) {
+void EditorLayer::LoadScene(const std::string &filePath)
+{
   // App/Settings Configuration
   m_Scene = SGE::CreateRef<SGE::Scene>();
   SGE::FramebufferSpecification spec{};
-  if (!m_Framebuffer) {
+  if (!m_Framebuffer)
+  {
     spec.Width = 2560;
     spec.Height = 1080;
-  } else {
+  }
+  else
+  {
     spec = m_Framebuffer->GetFrameBufferSpecification();
   }
 
@@ -364,7 +353,8 @@ void EditorLayer::LoadScene(const std::string &filePath) {
   m_ViewPortSize = {spec.Width, spec.Height};
 }
 
-void EditorLayer::ResetScene() {
+void EditorLayer::ResetScene()
+{
   m_SceneData.ProjectionMatrix = glm::perspective(
       glm::radians(90.0f),
       (float)m_SceneData.SceneWidth / (float)m_SceneData.SceneHeight, 0.1f,
@@ -373,7 +363,8 @@ void EditorLayer::ResetScene() {
   {
     // TODO: Add Script Serialization
     auto view = m_Scene->Registry().view<SGE::Camera3DComponent>();
-    for (auto e : view) {
+    for (auto e : view)
+    {
       SGE::Entity entity{e, m_Scene.get()};
       m_SceneData.MainCamera = entity;
       entity.AddNativeScriptComponent<CameraController>();
@@ -384,7 +375,8 @@ void EditorLayer::ResetScene() {
   // directional lights
   {
     auto view = m_Scene->Registry().view<SGE::DirectionalLightComponent>();
-    for (auto e : view) {
+    for (auto e : view)
+    {
       SGE::Entity entity{e, m_Scene.get()};
       m_SceneData.DirectionalLight = entity;
       break;
@@ -397,43 +389,52 @@ void EditorLayer::ResetScene() {
   SGE::GrassRenderer::Configure(m_SceneData);
 }
 
-bool EditorLayer::OnWindowResize(SGE::WindowResizeEvent &event) {
+bool EditorLayer::OnWindowResize(SGE::WindowResizeEvent &event)
+{
   m_Framebuffer->Resize(event.GetWidth(), event.GetHeight());
   m_ViewPortSize = {event.GetWidth(), event.GetHeight()};
   return false;
 }
 
-void EditorLayer::ShowFileMenuHierarchy() {
-  if (ImGui::MenuItem("New")) {
+void EditorLayer::ShowFileMenuHierarchy()
+{
+  if (ImGui::MenuItem("New"))
+  {
   }
-  if (ImGui::MenuItem("Open", "Ctrl+O")) {
+  if (ImGui::MenuItem("Open", "Ctrl+O"))
+  {
     std::string filePath =
         SGE::FileDialogs::OpenFile("SENGINE Scene (*.selfish)\0*.selfish\0");
     if (!filePath.empty())
       LoadScene(filePath);
   }
-  if (ImGui::BeginMenu("Open Recent")) {
+  if (ImGui::BeginMenu("Open Recent"))
+  {
     ImGui::MenuItem("fish_hat.c");
     ImGui::MenuItem("fish_hat.inl");
     ImGui::MenuItem("fish_hat.h");
     ImGui::EndMenu();
   }
-  if (ImGui::MenuItem("Save", "Ctrl+S")) {
+  if (ImGui::MenuItem("Save", "Ctrl+S"))
+  {
     SGE::SceneSerializer serializer(m_Scene);
     serializer.Serialize("assets/scenes/example.selfish");
   }
 
-  if (ImGui::MenuItem("Save As..")) {
+  if (ImGui::MenuItem("Save As.."))
+  {
     std::string filePath =
         SGE::FileDialogs::SaveFile("SENGINE Scene (*.selfish)\0*.selfish\0");
-    if (!filePath.empty()) {
+    if (!filePath.empty())
+    {
       SGE::SceneSerializer serializer(m_Scene);
       serializer.Serialize(filePath);
     }
   }
 
   ImGui::Separator();
-  if (ImGui::BeginMenu("Options")) {
+  if (ImGui::BeginMenu("Options"))
+  {
     static bool enabled = true;
     ImGui::MenuItem("Enabled", "", &enabled);
     ImGui::BeginChild("child", ImVec2(0, 60), true);
@@ -448,9 +449,11 @@ void EditorLayer::ShowFileMenuHierarchy() {
     ImGui::EndMenu();
   }
 
-  if (ImGui::BeginMenu("Colors")) {
+  if (ImGui::BeginMenu("Colors"))
+  {
     float sz = ImGui::GetTextLineHeight();
-    for (int i = 0; i < ImGuiCol_COUNT; i++) {
+    for (int i = 0; i < ImGuiCol_COUNT; i++)
+    {
       const char *name = ImGui::GetStyleColorName((ImGuiCol)i);
       ImVec2 p = ImGui::GetCursorScreenPos();
       ImGui::GetWindowDrawList()->AddRectFilled(
@@ -477,22 +480,29 @@ void EditorLayer::ShowFileMenuHierarchy() {
   {
     IM_ASSERT(0);
   }
-  if (ImGui::MenuItem("Checked", NULL, true)) {
+  if (ImGui::MenuItem("Checked", NULL, true))
+  {
   }
-  if (ImGui::MenuItem("Quit", "Alt+F4")) {
+  if (ImGui::MenuItem("Quit", "Alt+F4"))
+  {
     SGE::Application::Get().ShutDown();
   }
 }
 
-void EditorLayer::ShowGameViewPort() {
+void EditorLayer::ShowGameViewPort()
+{
   ImGui::Begin("View Port Menu");
   static std::string runLabel = "Play";
-  if (ImGui::Button(runLabel.c_str())) {
-    if (m_Scene->m_SceneState == SGE::SCENE_STATE::PAUSE) {
+  if (ImGui::Button(runLabel.c_str()))
+  {
+    if (m_Scene->m_SceneState == SGE::SCENE_STATE::PAUSE)
+    {
       m_Scene->OnScenePlay();
       runLabel = "Pause";
       m_EditorState = EditorState::GameRunning;
-    } else {
+    }
+    else
+    {
       m_Scene->OnSceneStop();
       runLabel = "Play";
       m_EditorState = EditorState::GamePaused;
@@ -512,7 +522,8 @@ void EditorLayer::ShowGameViewPort() {
                ImVec2(1, 0));
 
   if (dockSize.x != m_Framebuffer->GetFrameBufferSpecification().Width ||
-      dockSize.y != m_Framebuffer->GetFrameBufferSpecification().Height) {
+      dockSize.y != m_Framebuffer->GetFrameBufferSpecification().Height)
+  {
     // Rebuild framebuffer when viewport changes
     m_Framebuffer->Resize(dockSize.x, dockSize.y);
 
@@ -533,6 +544,8 @@ void EditorLayer::ShowGameViewPort() {
         1000.0f);
 
     SGE::Renderer::Configure(m_SceneData);
+    SGE::SkinnedMeshRenderer::Configure(m_SceneData);
+    SGE::GrassRenderer::Configure(m_SceneData);
   }
 
   ImGui::End();

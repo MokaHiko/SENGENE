@@ -60,6 +60,23 @@ namespace SGE
             return entity;
         }
 
+        void RemoveEntity(Entity entity)
+        {
+            m_EntitiesToDestroy.push_back(entity);
+
+            // auto &transform = entity.AddComponent<TransformComponent>();
+            // transform = otherEntity.GetComponent<TransformComponent>();
+
+            // if (otherEntity.HasComponent<TagComponent>())
+            //     entity.AddComponent<TagComponent>(otherEntity.GetComponent<TagComponent>().Tag);
+
+            // if (otherEntity.HasComponent<MeshRendererComponent>())
+            //     entity.AddComponent<MeshRendererComponent>(otherEntity.GetComponent<MeshRendererComponent>().Model);
+
+            // if (otherEntity.HasComponent<SkinnedMeshRendererComponent>())
+            //     entity.AddComponent<SkinnedMeshRendererComponent>(otherEntity.GetComponent<SkinnedMeshRendererComponent>().AnimatedModel);
+        }
+
         Entity CreateEntity(Entity otherEntity, const std::string &name = "UNNAMED_ENTITY")
         {
             Entity entity = {m_Registry.create(), this};
@@ -75,6 +92,12 @@ namespace SGE
 
             if (otherEntity.HasComponent<SkinnedMeshRendererComponent>())
                 entity.AddComponent<SkinnedMeshRendererComponent>(otherEntity.GetComponent<SkinnedMeshRendererComponent>().AnimatedModel);
+
+            if (otherEntity.HasComponent<RigidBodyComponent>())
+                entity.AddComponent<SGE::RigidBodyComponent>();
+
+            if (otherEntity.HasComponent<SphereColliderComponent>())
+                entity.AddComponent<SphereColliderComponent>().sphereCollider.Radius = 1.0f;
 
             return entity;
         }
@@ -93,6 +116,8 @@ namespace SGE
     private:
         entt::registry m_Registry;
         std::string m_Name;
+
+        std::vector<Entity> m_EntitiesToDestroy;
 
         friend class Entity;
         friend class SceneSerializer;

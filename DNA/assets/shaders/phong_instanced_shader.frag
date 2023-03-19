@@ -74,7 +74,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 {
 	vec3 lightDir = normalize(-light.Direction);
 
-	float diff = max(dot(normal,lightDir),0.0);
+	float diff = max(dot(normal,lightDir), 0.25);
 
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir,reflectDir), 0.0f), 32);

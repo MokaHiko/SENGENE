@@ -41,6 +41,9 @@ namespace SGE
         void DrawMesh(const Mesh &mesh);
         void Clear();
 
+        // Material
+        void SetMaterial(const Ref<Material> material);
+
         // - Panel Interface
         const std::vector<Ref<Material>> &GetMaterials() const { return m_Materials; }
         uint32_t GetNMaterials() const { return static_cast<uint32_t>(m_Materials.size()); }
@@ -52,7 +55,6 @@ namespace SGE
         bool ProcessScene(const aiScene *scene, const std::string &fileName);
         bool ProcessMaterials(const aiScene *scene, const std::string &fileName);
         void ProcessMesh(const aiMesh *pMesh);
-        void ProcessNodeHierarchy(const aiNode *pNode, const glm::mat4 &parentTransform, float timeInTicks);
 
         // - Buffers
         void PopulateBuffers();

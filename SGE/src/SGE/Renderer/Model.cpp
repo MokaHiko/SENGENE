@@ -126,9 +126,15 @@ namespace SGE
 
 			// Unbind Material Textures/Properties
 			if (m_Materials[materialIndex]->DiffuseTexture)
+			{
 				shader->SetBool("u_Material.HasDiffuseTexture", false);
+				m_Materials[materialIndex]->DiffuseTexture->Unbind(0);
+			}
 			if (m_Materials[materialIndex]->SpecularTexture)
+			{
 				shader->SetBool("u_Material.HasSpecularTexture", false);
+				m_Materials[materialIndex]->SpecularTexture->Unbind(1);
+			}
 		}
 
 		if (clearInstances)
@@ -360,5 +366,17 @@ namespace SGE
 		m_TexCoords.clear();
 
 		// TODO: Clear GPU Buffers
+	}
+
+	void Model::SetMaterial(const Ref<Material> material)
+	{
+		// Hard Change Material
+		m_Materials.clear();
+		m_Materials.push_back(material);
+
+		for (Mesh &mesh : m_Meshes)
+		{
+			mesh.SetMaterialIndex(0);
+		}
 	}
 }

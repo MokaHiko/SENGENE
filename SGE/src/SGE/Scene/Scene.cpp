@@ -20,6 +20,17 @@ namespace SGE
 
 	void Scene::OnScenePlay()
 	{
+		// Rebuild Physics World
+		auto group = m_Registry.group<RigidBodyComponent>(entt::get<TransformComponent>);
+		for (auto e : group)
+		{
+			Entity entity = {e, this};
+			RegisterToPhysicsWorld(entity);
+		}
+
+		// Bind OnCollisionEnterCallback
+		flg::PhysicsWorld::SetOnCollisionEnterCallBack(std::bind(&Scene::CollisionEnterCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 		// Implement script OnStart methods
 		{
 			auto view = m_Registry.view<NativeScriptComponent>();
@@ -34,21 +45,10 @@ namespace SGE
 					nsc.ScriptInstance = nsc.InstantiateScript();
 					nsc.ScriptInstance->m_Entity = Entity{entity, this};
 					nsc.ScriptInstance->OnCreate();
-					nsc.ScriptInstance->OnStart();
 				}
+				nsc.ScriptInstance->OnStart();
 			}
 		}
-
-		// Rebuild Physics World
-		auto group = m_Registry.group<RigidBodyComponent>(entt::get<TransformComponent>);
-		for (auto e : group)
-		{
-			Entity entity = {e, this};
-			RegisterToPhysicsWorld(entity);
-		}
-
-		// Bind OnCollisionEnterCallback
-		flg::PhysicsWorld::SetOnCollisionEnterCallBack(std::bind(&Scene::CollisionEnterCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 		m_SceneState = SCENE_STATE::PLAY;
 	}
@@ -124,28 +124,49 @@ namespace SGE
 
 		{
 			// Draw Meshes
+			auto group = m_Registry.group<MeshRendererComponent, TransformComponent>();
+
+			for (auto entity : group)
 			{
-				auto group = m_Registry.group<MeshRendererComponent, TransformComponent>();
-
-				for (auto entity : group)
-				{
-					auto &model = group.get<MeshRendererComponent>(entity);
-					auto &transform = group.get<TransformComponent>(entity);
-					Renderer::Draw(model.Model, transform.Position, transform.Rotation, transform.Scale);
-				}
+				auto &model = group.get<MeshRendererComponent>(entity);
+				auto &transform = group.get<TransformComponent>(entity);
+				Renderer::Draw(model.Model, transform.Position, transform.Rotation, transform.Scale);
 			}
+		}
 
-			// Draw Animated Meshes
+		// Draw Animated Meshes
+		{
+			auto group = m_Registry.group<SkinnedMeshRendererComponent>(entt::get<TransformComponent>);
+
+			for (auto entity : group)
 			{
-				auto group = m_Registry.group<SkinnedMeshRendererComponent>(entt::get<TransformComponent>);
-
-				for (auto entity : group)
-				{
-					auto &model = group.get<SkinnedMeshRendererComponent>(entity);
-					auto &transform = group.get<TransformComponent>(entity);
-					SkinnedMeshRenderer::Draw(model.AnimatedModel, transform.Position, transform.Rotation, transform.Scale);
-				}
+				auto &model = group.get<SkinnedMeshRendererComponent>(entity);
+				auto &transform = group.get<TransformComponent>(entity);
+				SkinnedMeshRenderer::Draw(model.AnimatedModel, transform.Position, transform.Rotation, transform.Scale);
 			}
+		}
+
+		// Clean Up
+		{
+			for (Entity entity : m_EntitiesToDestroy)
+			{
+				// Remove From Physics World
+				if (entity.HasComponent<RigidBodyComponent>())
+				{
+					flg::PhysicsWorld::RemoveBody(&entity.GetComponent<RigidBodyComponent>().Body);
+				}
+
+				// Call On Destroy If Scriptable
+				if (entity.HasComponent<NativeScriptComponent>())
+				{
+					auto &nsc = entity.GetComponent<NativeScriptComponent>();
+					nsc.ScriptInstance->OnDestroy();
+					// entity.GetComponent<NativeScriptComponent>().DestroyScript(&nsc);
+				}
+
+				m_Registry.destroy(entity.m_EntityHandle);
+			}
+			m_EntitiesToDestroy.clear();
 		}
 	}
 
@@ -189,11 +210,17 @@ namespace SGE
 		Entity e1{entityA, this};
 		Entity e2{entityB, this};
 
-		if (e1.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e2))
-			return;
+		if (e1.HasComponent<SGE::NativeScriptComponent>())
+		{
+			if (e1.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e2))
+				return;
+		}
 
-		if (e2.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e1))
-			return;
+		if (e2.HasComponent<SGE::NativeScriptComponent>())
+		{
+			if (e2.GetComponent<SGE::NativeScriptComponent>().ScriptInstance->OnCollisionEnter(col, e1))
+				return;
+		}
 	};
 	void Scene::CollisionExitCallback(flg::CollisionPoints &col, uint32_t entityA, uint32_t entityB){
 

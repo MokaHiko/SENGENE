@@ -1,5 +1,5 @@
 # Builds
-.build
+build
 build/
 .vscode
 .cache

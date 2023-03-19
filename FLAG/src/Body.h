@@ -43,6 +43,11 @@ namespace flg
 
         const glm::vec3 &GetPosition() { return BodyTransform.Position; };
 
+        void SetPosition(const glm::vec3 &newPositon, bool retainVelocity = false)
+        {
+            BodyTransform.Position = newPositon;
+        };
+
         void SetEntityOwnerID(uint32_t id) { OwnerEntityID = id; };
         uint32_t GetEntityOwnerID() { return OwnerEntityID; };
 

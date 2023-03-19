@@ -14,7 +14,7 @@ namespace flg
 {
     struct PhysicsWorldProperties
     {
-        glm::vec3 Gravity = {0.0f, -9.81f, 0.0f};
+        glm::vec3 Gravity = glm::vec3{0.0f, -9.81f, 0.0f} * 5.0f;
     };
 
     // World that holds a reference to all physics bodies
@@ -46,6 +46,9 @@ namespace flg
         static Raycasthit Raycast(const Ray *ray, float distance = 1000.0f);
         static std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> m_CollisionEnterCallback;
         static std::function<void(CollisionPoints &col, uint32_t entityA, uint32_t entityB)> m_CollisionExitCallback;
+
+    private:
+        static void ResolveCollision(float dt);
 
     private:
         PhysicsWorld() {}

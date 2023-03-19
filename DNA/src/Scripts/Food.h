@@ -7,7 +7,7 @@
 
 struct FoodProperties
 {
-    int HealthRegen;
+    float HealthRegen;
 };
 
 class Food : public SGE::ScriptableEntity
@@ -18,6 +18,7 @@ public:
 
     virtual void OnCreate()
     {
+        Reset();
         m_Properties.HealthRegen = 10.0f;
     }
 
@@ -29,8 +30,21 @@ public:
     {
     }
 
+public:
+    FoodProperties Eat()
+    {
+        Reset();
+        return m_Properties;
+    }
+
+    void Reset()
+    {
+        GameObject().GetComponent<SGE::RigidBodyComponent>().Body.SetPosition(glm::vec3{(rand() - RAND_MAX / 2) % m_SpawnRange, 0.0f, (rand() - RAND_MAX / 2) % m_SpawnRange});
+    }
+
 private:
     FoodProperties m_Properties;
+    int m_SpawnRange = 20;
 };
 
 #endif

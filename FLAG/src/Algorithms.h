@@ -63,8 +63,7 @@ namespace flg
 
 			if (differenceMagnitude < sumRadius)
 			{
-				// TODO: Add Point of Collision
-				return CollisionPoints{glm::vec3(), true};
+				return CollisionPoints{difference / 2.0f, true};
 			}
 
 			return {};
